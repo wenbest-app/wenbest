@@ -84,10 +84,24 @@ export default function LoginScreen() {
     setLoading(false);
 
     if (error) {
-      setIsError(true);
-      setMessage(error.message);
-      return;
-    }
+  setIsError(true);
+
+  if (
+    error.message.toLowerCase().includes('invalid login') ||
+    error.message.toLowerCase().includes('invalid credentials')
+  ) {
+    setMessage('البريد الإلكتروني أو كلمة المرور غير صحيحة.');
+  } else if (
+    error.message.toLowerCase().includes('network') ||
+    error.message.toLowerCase().includes('fetch')
+  ) {
+    setMessage('لا يوجد اتصال بالإنترنت. تحقق من الشبكة ثم حاول مرة أخرى.');
+  } else {
+    setMessage('تعذر تسجيل الدخول حالياً. حاول مرة أخرى.');
+  }
+
+  return;
+}
 
     setIsError(false);
     setMessage('تم تسجيل الدخول بنجاح.');
@@ -121,10 +135,21 @@ export default function LoginScreen() {
     setLoading(false);
 
     if (error) {
-      setIsError(true);
-      setMessage(error.message);
-      return;
-    }
+  setIsError(true);
+
+  if (error.message.toLowerCase().includes('already registered')) {
+    setMessage('هذا البريد الإلكتروني مسجل مسبقاً.');
+  } else if (
+    error.message.toLowerCase().includes('network') ||
+    error.message.toLowerCase().includes('fetch')
+  ) {
+    setMessage('لا يوجد اتصال بالإنترنت. تحقق من الشبكة ثم حاول مرة أخرى.');
+  } else {
+    setMessage('تعذر إنشاء الحساب حالياً. حاول مرة أخرى.');
+  }
+
+  return;
+}
 
     setIsError(false);
     setMessage('تم إنشاء الحساب. إذا كان تأكيد البريد مفعّلًا، افحص بريدك الإلكتروني.');
@@ -150,10 +175,19 @@ export default function LoginScreen() {
     setLoading(false);
 
     if (error) {
-      setIsError(true);
-      setMessage(error.message);
-      return;
-    }
+  setIsError(true);
+
+  if (
+    error.message.toLowerCase().includes('network') ||
+    error.message.toLowerCase().includes('fetch')
+  ) {
+    setMessage('لا يوجد اتصال بالإنترنت. تحقق من الشبكة ثم حاول مرة أخرى.');
+  } else {
+    setMessage('تعذر إرسال رابط إعادة التعيين حالياً. حاول مرة أخرى.');
+  }
+
+  return;
+}
 
     setIsError(false);
     setMessage('تم إرسال رابط إعادة تعيين كلمة السر إلى بريدك الإلكتروني.');

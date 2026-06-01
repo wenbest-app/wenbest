@@ -7,6 +7,7 @@ import {
   Modal,
   SafeAreaView,
   ScrollView,
+  Share,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -47,15 +48,8 @@ type ReviewItem = {
 
 function formatDistance(distanceValue: string) {
   const distance = Number(distanceValue);
-
-  if (!distanceValue || Number.isNaN(distance)) {
-    return 'غير معروف';
-  }
-
-  if (distance < 1000) {
-    return `${Math.round(distance)} متر`;
-  }
-
+  if (!distanceValue || Number.isNaN(distance)) return 'غير معروف';
+  if (distance < 1000) return `${Math.round(distance)} متر`;
   return `${(distance / 1000).toFixed(1)} كم`;
 }
 
@@ -96,25 +90,13 @@ function getDirectionsUrl(name: string, address: string, latitude: string, longi
 }
 
 function parseReviews(value: any): ReviewItem[] {
-  if (!value) {
-    return [];
-  }
+  if (!value) return [];
 
   try {
     const parsed = typeof value === 'string' ? JSON.parse(value) : value;
-
-    if (Array.isArray(parsed)) {
-      return parsed;
-    }
-
-    if (Array.isArray(parsed?.reviews)) {
-      return parsed.reviews;
-    }
-
-    if (Array.isArray(parsed?.result?.reviews)) {
-      return parsed.result.reviews;
-    }
-
+    if (Array.isArray(parsed)) return parsed;
+    if (Array.isArray(parsed?.reviews)) return parsed.reviews;
+    if (Array.isArray(parsed?.result?.reviews)) return parsed.result.reviews;
     return [];
   } catch {
     return [];
@@ -123,13 +105,8 @@ function parseReviews(value: any): ReviewItem[] {
 
 function renderStars(rating?: number) {
   const value = Number(rating || 0);
-
-  if (!value || Number.isNaN(value)) {
-    return '⭐';
-  }
-
+  if (!value || Number.isNaN(value)) return '⭐';
   const fullStars = Math.max(1, Math.min(5, Math.round(value)));
-
   return '⭐'.repeat(fullStars);
 }
 
@@ -155,23 +132,24 @@ export default function PlaceDetailsScreen() {
   const reviewCount = String(params.reviewCount ?? '');
   const openStatusLabel = String(params.openStatusLabel ?? 'غير معلوم');
   const openStatusIcon = String(params.openStatusIcon ?? '⚪');
-  const explainTitle =
-  sortMode === 'nearest'
-    ? '📍 لماذا ظهر كالأقرب لك؟'
-    : sortMode === 'rating'
-      ? '⭐ لماذا ظهر كأعلى تقييم؟'
-      : sortMode === 'reviews'
-        ? '💬 لماذا ظهر كأكثر مراجعات؟'
-        : '🏆 لماذا اختاره WenBest؟';
 
-const explainText =
-  sortMode === 'nearest'
-    ? 'تم ترتيبه بناءً على قربه من موقعك الحالي مع مراعاة بيانات المكان المتاحة.'
-    : sortMode === 'rating'
-      ? 'ظهر هنا لأن تقييمه من Google من بين الأعلى ضمن النتائج.'
-      : sortMode === 'reviews'
-        ? 'ظهر هنا لأنه من أكثر الأماكن حصولًا على مراجعات من المستخدمين.'
-        : 'يعتمد WenBest على التقييم، عدد المراجعات، المسافة، ومدى مطابقة المكان لبحثك.';
+  const explainTitle =
+    sortMode === 'nearest'
+      ? '📍 لماذا ظهر كالأقرب لك؟'
+      : sortMode === 'rating'
+        ? '⭐ لماذا ظهر كأعلى تقييم؟'
+        : sortMode === 'reviews'
+          ? '💬 لماذا ظهر كأكثر مراجعات؟'
+          : '🏆 لماذا رشحه WenBest؟';
+
+  const explainText =
+    sortMode === 'nearest'
+      ? 'تم ترتيبه بناءً على قربه من موقعك الحالي مع مراعاة بيانات المكان المتاحة.'
+      : sortMode === 'rating'
+        ? 'ظهر هنا لأن تقييمه من Google من بين الأعلى ضمن النتائج.'
+        : sortMode === 'reviews'
+          ? 'ظهر هنا لأنه من أكثر الأماكن حصولًا على مراجعات من المستخدمين.'
+          : 'يعتمد ترشيح WenBest على التقييم، وعدد المراجعات، والمسافة، ومدى مطابقة المكان لبحثك بهدف مساعدتك على اختيار المكان الأنسب بثقة.';
 
   const initialReviews = useMemo(() => {
     return parseReviews(params.reviews ?? params.googleReviews ?? params.rawReviews);
@@ -192,7 +170,6 @@ const explainText =
   const categoryLabel = getCategoryArabic(category);
   const mapsUrl = getMapsUrl(name, address, latitude, longitude);
   const directionsUrl = getDirectionsUrl(name, address, latitude, longitude);
-
   const reviewsToShow = googleReviews.length > 0 ? googleReviews : initialReviews;
 
   useEffect(() => {
@@ -200,9 +177,7 @@ const explainText =
   }, [id]);
 
   async function checkFavoriteStatus() {
-    if (!id) {
-      return;
-    }
+    if (!id) return;
 
     const { data: userData } = await supabase.auth.getUser();
 
@@ -240,21 +215,17 @@ const explainText =
     }
 
     if (favoriteId) {
-      const { error } = await supabase
-        .from('favorites')
-        .delete()
-        .eq('id', favoriteId);
+      const { error } = await supabase.from('favorites').delete().eq('id', favoriteId);
 
       setFavoriteLoading(false);
 
       if (error) {
         setIsError(true);
-        setMessage(`تعذر إزالة المكان من المفضلة: ${error.message}`);
+        setMessage('تعذر إزالة المكان من المفضلة. حاول مرة أخرى.');
         return;
       }
 
       setFavoriteId(null);
-      setIsError(false);
       setMessage('تمت إزالة المكان من المفضلة.');
       return;
     }
@@ -297,12 +268,11 @@ const explainText =
 
     if (error) {
       setIsError(true);
-      setMessage(`تعذر حفظ المكان في المفضلة: ${error.message}`);
+      setMessage('تعذر حفظ المكان في المفضلة. حاول مرة أخرى.');
       return;
     }
 
     setFavoriteId(data?.id ?? null);
-    setIsError(false);
     setMessage('تم حفظ المكان في المفضلة.');
   }
 
@@ -324,9 +294,9 @@ const explainText =
 
     try {
       await Linking.openURL(directionsUrl);
-    } catch (error) {
+    } catch {
       setIsError(true);
-      setMessage('تعذر فتح الاتجاهات. حاول فتح المكان عبر Google Maps.');
+      setMessage('تعذر فتح الاتجاهات. حاول فتح المكان عبر الخرائط.');
     }
   }
 
@@ -336,9 +306,9 @@ const explainText =
 
     try {
       await Linking.openURL(mapsUrl);
-    } catch (error) {
+    } catch {
       setIsError(true);
-      setMessage('تعذر فتح Google Maps لهذا المكان.');
+      setMessage('تعذر فتح الخرائط لهذا المكان.');
     }
   }
 
@@ -346,7 +316,7 @@ const explainText =
     setMessage('');
     setIsError(false);
 
-    const shareText = `رشحت لك هذا المكان من WenBest:
+    const shareText = `رشح لك هذا المكان من WenBest:
 
 ${name}
 
@@ -365,35 +335,17 @@ ${optionGroup || categoryLabel}${option ? ` - ${option}` : ''}
 ${mapsUrl}`;
 
     try {
-      const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
-
-      if (typeof navigator !== 'undefined' && navigator.share) {
-        await navigator.share({
-          title: name,
-          text: shareText,
-          url: mapsUrl,
-        });
-        return;
-      }
-
-      const canOpenWhatsapp = await Linking.canOpenURL(whatsappUrl);
-
-      if (canOpenWhatsapp) {
-        await Linking.openURL(whatsappUrl);
-        return;
-      }
-
-      await Linking.openURL(mapsUrl);
-    } catch (error) {
+      await Share.share({
+        message: shareText,
+      });
+    } catch {
       setIsError(true);
-      setMessage('تعذرت المشاركة من هذا المتصفح. يمكنك فتح Google Maps ومشاركة المكان منه.');
+      setMessage('تعذرت مشاركة المكان. حاول مرة أخرى.');
     }
   }
 
   async function loadGoogleReviews() {
-    if (reviewsLoaded && googleReviews.length > 0) {
-      return;
-    }
+    if (reviewsLoaded && googleReviews.length > 0) return;
 
     setReviewsLoading(true);
     setReviewsError('');
@@ -490,7 +442,7 @@ ${mapsUrl}`;
             </View>
 
             <Text style={styles.bestChoiceText}>
-              {Number(score) >= 85 ? '⭐ اختيار قوي' : '⭐ اختيار مناسب'}
+              {Number(score) >= 85 ? '🏆 موصى به من WenBest' : '⭐ اختيار مناسب'}
             </Text>
           </View>
 
@@ -548,114 +500,74 @@ ${mapsUrl}`;
           </View>
         </View>
 
-        <View style={styles.actionPanel}>
-  <TouchableOpacity style={styles.primaryAction} onPress={openDirections}>
-    <Text style={styles.primaryActionText}>الاتجاهات</Text>
-  </TouchableOpacity>
+        <View style={styles.actionGrid}>
+          <TouchableOpacity style={styles.actionTileGold} onPress={openDirections}>
+            <Text style={styles.actionTileIcon}>🚗</Text>
+            <Text style={styles.actionTileTitle}>الاتجاهات</Text>
+          </TouchableOpacity>
 
-  <TouchableOpacity style={styles.secondaryAction} onPress={openGoogleMaps}>
-    <Text style={styles.secondaryActionText}>افتح في الخرائط</Text>
-  </TouchableOpacity>
+          <TouchableOpacity style={styles.actionTileTeal} onPress={openGoogleMaps}>
+            <Text style={styles.actionTileIcon}>🗺️</Text>
+            <Text style={styles.actionTileTitleTeal}>فتح الخرائط</Text>
+          </TouchableOpacity>
 
-  <TouchableOpacity style={styles.commentsAction} onPress={openReviewsModal}>
-    <Text style={styles.commentsActionText}>قراءة التعليقات 💬</Text>
-  </TouchableOpacity>
+          <TouchableOpacity style={styles.actionTileLight} onPress={openReviewsModal}>
+            <Text style={styles.actionTileIcon}>💬</Text>
+            <Text style={styles.actionTileTitleNavy}>التعليقات</Text>
+          </TouchableOpacity>
 
-  <TouchableOpacity
-    style={favoriteId ? styles.removeFavoriteAction : styles.favoriteAction}
-    onPress={toggleFavorite}
-    disabled={favoriteLoading}
-  >
-    <Text style={favoriteId ? styles.removeFavoriteActionText : styles.favoriteActionText}>
-      {favoriteLoading
-        ? 'جاري التنفيذ...'
-        : favoriteId
-          ? 'إزالة من المفضلة'
-          : 'حفظ في المفضلة'}
-    </Text>
-  </TouchableOpacity>
+          <TouchableOpacity
+            style={favoriteId ? styles.actionTileDanger : styles.actionTileFavorite}
+            onPress={toggleFavorite}
+            disabled={favoriteLoading}
+          >
+            <Text style={styles.actionTileIcon}>❤️</Text>
+            <Text
+              style={
+                favoriteId ? styles.actionTileTitleDanger : styles.actionTileTitleFavorite
+              }
+            >
+              {favoriteLoading
+                ? 'جاري التنفيذ...'
+                : favoriteId
+                  ? 'إزالة المفضلة'
+                  : 'حفظ بالمفضلة'}
+            </Text>
+          </TouchableOpacity>
+        </View>
 
-  <TouchableOpacity style={styles.shareAction} onPress={sharePlace}>
-    <Text style={styles.shareActionText}>مشاركة المكان</Text>
-  </TouchableOpacity>
-</View>
+        <TouchableOpacity style={styles.shareWideButton} onPress={sharePlace}>
+          <Text style={styles.shareWideButtonText}>🔗 مشاركة المكان</Text>
+        </TouchableOpacity>
 
         <View style={styles.reasonCard}>
           <Text style={styles.reasonTitle}>{explainTitle}</Text>
-          <Text style={styles.reasonText}>
-           {explainText}
-          </Text>
+          <Text style={styles.reasonText}>{explainText}</Text>
 
-          <View style={styles.reasonItem}>
-            <View style={styles.reasonIconBox}>
-              <Text style={styles.reasonIcon}>⭐</Text>
-            </View>
-            <View style={styles.reasonTextBox}>
+          <View style={styles.reasonCompactRow}>
+            <Text style={styles.reasonCompactIcon}>🧠</Text>
+            <View style={styles.reasonCompactTextBox}>
               <Text style={styles.reasonItemTitle}>درجة WenBest</Text>
               <Text style={styles.reasonItemText}>{score}/100</Text>
             </View>
           </View>
 
-          <View style={styles.reasonItem}>
-            <View style={styles.reasonIconBox}>
-              <Text style={styles.reasonIcon}>🔎</Text>
-            </View>
-            <View style={styles.reasonTextBox}>
+          <View style={styles.reasonCompactRow}>
+            <Text style={styles.reasonCompactIcon}>🔎</Text>
+            <View style={styles.reasonCompactTextBox}>
               <Text style={styles.reasonItemTitle}>مطابقة البحث</Text>
               <Text style={styles.reasonItemText}>{matchLabel}</Text>
             </View>
           </View>
 
-          <View style={styles.reasonItem}>
-            <View style={styles.reasonIconBox}>
-              <Text style={styles.reasonIcon}>📍</Text>
-            </View>
-            <View style={styles.reasonTextBox}>
+          <View style={styles.reasonCompactRow}>
+            <Text style={styles.reasonCompactIcon}>📍</Text>
+            <View style={styles.reasonCompactTextBox}>
               <Text style={styles.reasonItemTitle}>المسافة</Text>
               <Text style={styles.reasonItemText}>{formatDistance(distance)}</Text>
             </View>
           </View>
         </View>
-
-        <View style={styles.infoCard}>
-          <Text style={styles.infoTitle}>معلومات المكان</Text>
-
-          {optionGroup ? (
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>التصنيف الفرعي</Text>
-              <Text style={styles.infoValue}>{optionGroup}</Text>
-            </View>
-          ) : null}
-
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>البحث المختار</Text>
-            <Text style={styles.infoValue}>{option || 'أفضل اختيار'}</Text>
-          </View>
-
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>المسافة</Text>
-            <Text style={styles.infoValue}>{formatDistance(distance)}</Text>
-          </View>
-
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>التقييم</Text>
-            <Text style={styles.infoValue}>{rating || 'غير متوفر'}</Text>
-          </View>
-
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>عدد المراجعات</Text>
-            <Text style={styles.infoValue}>{reviewCount || '0'}</Text>
-          </View>
-
-          {openStatusLabel !== 'غير معلوم' && (
-  <View style={styles.infoRow}>
-    <Text style={styles.infoLabel}>حالة الدوام</Text>
-    <Text style={styles.infoValue}>{openStatusLabel}</Text>
-  </View>
-)}
-  
-        </View>
-
       </ScrollView>
 
       <Modal
@@ -677,12 +589,25 @@ ${mapsUrl}`;
               </TouchableOpacity>
 
               <View style={styles.reviewsTitleBox}>
-                <Text style={styles.reviewsTitle}>تعليقات المكان</Text>
+                <Text style={styles.reviewsTitle}>💬 تعليقات Google</Text>
                 <Text style={styles.reviewsSubtitle}>{name}</Text>
+                <Text style={styles.reviewsMeta}>
+                  ⭐ {rating || 'غير متوفر'} | 💬 {reviewCount || '0'} مراجعة
+                </Text>
               </View>
             </View>
 
             <ScrollView style={styles.reviewsList} contentContainerStyle={styles.reviewsListContent}>
+              <View style={styles.reviewsSummaryCard}>
+                <Text style={styles.reviewsSummaryTitle}>ملخص التقييمات</Text>
+                <Text style={styles.reviewsSummaryMain}>
+                  ⭐ {rating || 'غير متوفر'} من 5
+                </Text>
+                <Text style={styles.reviewsSummarySub}>
+                  بناءً على {reviewCount || '0'} مراجعة من Google
+                </Text>
+              </View>
+
               {reviewsLoading ? (
                 <View style={styles.noReviewsBox}>
                   <ActivityIndicator color={colors.navy} />
@@ -712,14 +637,20 @@ ${mapsUrl}`;
 
                         <View style={styles.reviewHeaderText}>
                           <Text style={styles.reviewAuthor}>{author}</Text>
-                          <Text style={styles.reviewRating}>
-                            {renderStars(reviewRating)} {reviewRating ? `${reviewRating}/5` : ''}
-                          </Text>
-                          {timeText ? (
-                            <Text style={styles.reviewTime}>{timeText}</Text>
-                          ) : null}
+
+                          <View style={styles.reviewMetaRow}>
+                            <Text style={styles.reviewRating}>
+                              {renderStars(reviewRating)} {reviewRating ? `${reviewRating}/5` : ''}
+                            </Text>
+
+                            {timeText ? (
+                              <Text style={styles.reviewTime}>{timeText}</Text>
+                            ) : null}
+                          </View>
                         </View>
                       </View>
+
+                      <View style={styles.reviewDivider} />
 
                       <Text style={styles.reviewText}>{reviewText}</Text>
                     </View>
@@ -735,7 +666,7 @@ ${mapsUrl}`;
 
                   <TouchableOpacity style={styles.openMapsReviewsButton} onPress={openGoogleMaps}>
                     <Text style={styles.openMapsReviewsButtonText}>
-                     افتح المكان في الخرائط
+                      افتح المكان في الخرائط
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -749,10 +680,7 @@ ${mapsUrl}`;
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
+  safeArea: { flex: 1, backgroundColor: colors.bg },
   container: {
     padding: 18,
     paddingBottom: 44,
@@ -776,22 +704,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  iconButtonText: {
-    color: colors.navy,
-    fontSize: 22,
-    fontWeight: '900',
-  },
+  iconButtonText: { color: colors.navy, fontSize: 22, fontWeight: '900' },
   homeButton: {
     backgroundColor: colors.navy,
     borderRadius: 999,
     paddingVertical: 12,
     paddingHorizontal: 18,
   },
-  homeButtonText: {
-    color: colors.white,
-    fontWeight: '900',
-    fontSize: 15,
-  },
+  homeButtonText: { color: colors.white, fontWeight: '900', fontSize: 15 },
   logoMiniBox: {
     width: 76,
     height: 58,
@@ -802,10 +722,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  logoMini: {
-    width: 64,
-    height: 48,
-  },
+  logoMini: { width: 64, height: 48 },
   pageHeader: {
     backgroundColor: colors.white,
     borderRadius: 28,
@@ -814,12 +731,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     marginBottom: 16,
   },
-  pageTitle: {
-    color: colors.navy,
-    fontSize: 28,
-    fontWeight: '900',
-    textAlign: 'right',
-  },
+  pageTitle: { color: colors.navy, fontSize: 28, fontWeight: '900', textAlign: 'right' },
   pageSubtitle: {
     color: colors.muted,
     fontSize: 14,
@@ -847,11 +759,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 16,
   },
-  scorePillText: {
-    color: colors.white,
-    fontSize: 18,
-    fontWeight: '900',
-  },
+  scorePillText: { color: colors.white, fontSize: 18, fontWeight: '900' },
   bestChoiceText: {
     color: colors.gold,
     fontSize: 18,
@@ -893,15 +801,9 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     textAlign: 'center',
   },
-  statusOpen: {
-    backgroundColor: '#DCFCE7',
-  },
-  statusClosed: {
-    backgroundColor: '#FEE2E2',
-  },
-  statusUnknown: {
-    backgroundColor: colors.gold,
-  },
+  statusOpen: { backgroundColor: '#DCFCE7' },
+  statusClosed: { backgroundColor: '#FEE2E2' },
+  statusUnknown: { backgroundColor: colors.gold },
   messageBox: {
     backgroundColor: '#ECFDF5',
     borderWidth: 1,
@@ -910,10 +812,7 @@ const styles = StyleSheet.create({
     padding: 14,
     marginBottom: 16,
   },
-  errorBox: {
-    backgroundColor: '#FEF2F2',
-    borderColor: '#FECACA',
-  },
+  errorBox: { backgroundColor: '#FEF2F2', borderColor: '#FECACA' },
   messageText: {
     color: colors.green,
     fontSize: 15,
@@ -921,132 +820,122 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 24,
   },
-  errorText: {
-    color: colors.red,
-  },
-  statsGrid: {
-    flexDirection: 'row-reverse',
-    flexWrap: 'wrap',
-    gap: 12,
-    marginBottom: 16,
-  },
+  errorText: { color: colors.red },
+  statsGrid: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: 12, marginBottom: 16 },
   statCard: {
     width: '48%',
-    minHeight: 150,
+    minHeight: 132,
     backgroundColor: colors.white,
-    borderRadius: 24,
+    borderRadius: 22,
     borderWidth: 1,
     borderColor: colors.border,
-    padding: 16,
+    padding: 14,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  statIcon: {
-    fontSize: 36,
-    marginBottom: 8,
-  },
+  statIcon: { fontSize: 32, marginBottom: 8 },
   statValue: {
     color: colors.navy,
-    fontSize: 25,
+    fontSize: 23,
     fontWeight: '900',
     textAlign: 'center',
   },
   statLabel: {
     color: colors.muted,
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '800',
     marginTop: 6,
     textAlign: 'center',
   },
-  actionPanel: {
-    backgroundColor: colors.white,
-    borderRadius: 26,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: 14,
-    gap: 12,
-    marginBottom: 16,
-  },
-  primaryAction: {
+  actionGrid: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: 12, marginBottom: 12 },
+  actionTileGold: {
+    width: '48%',
+    minHeight: 86,
     backgroundColor: colors.gold,
-    borderRadius: 18,
-    minHeight: 54,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 12,
   },
-  primaryActionText: {
-    color: colors.navy,
-    fontSize: 16,
-    fontWeight: '900',
-  },
-  secondaryAction: {
+  actionTileTeal: {
+    width: '48%',
+    minHeight: 86,
     backgroundColor: '#E6FFFA',
     borderWidth: 1,
     borderColor: '#99F6E4',
-    borderRadius: 18,
-    minHeight: 54,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 12,
   },
-  secondaryActionText: {
-    color: colors.tealDark,
-    fontSize: 16,
-    fontWeight: '900',
-  },
-  commentsAction: {
+  actionTileLight: {
+    width: '48%',
+    minHeight: 86,
     backgroundColor: '#FFF7E0',
     borderWidth: 1,
     borderColor: '#FDE68A',
-    borderRadius: 18,
-    minHeight: 54,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 12,
   },
-  commentsActionText: {
-    color: colors.navy,
-    fontSize: 16,
-    fontWeight: '900',
+  actionTileFavorite: {
+    width: '48%',
+    minHeight: 86,
+    backgroundColor: '#DDF7F4',
+    borderWidth: 1,
+    borderColor: '#A7E7DF',
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 12,
   },
-  favoriteAction: {
-  backgroundColor: '#DDF7F4',
-  borderWidth: 1,
-  borderColor: '#A7E7DF',
-  borderRadius: 18,
-  minHeight: 54,
-  justifyContent: 'center',
-  alignItems: 'center',
-},
-favoriteActionText: {
-  color: '#0A7A70',
-  fontSize: 16,
-  fontWeight: '900',
-},
-  removeFavoriteAction: {
+  actionTileDanger: {
+    width: '48%',
+    minHeight: 86,
     backgroundColor: '#FEF2F2',
     borderWidth: 1,
     borderColor: '#FECACA',
-    borderRadius: 18,
-    minHeight: 54,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 12,
   },
-  removeFavoriteActionText: {
+  actionTileIcon: { fontSize: 28, marginBottom: 6 },
+  actionTileTitle: { color: colors.navy, fontSize: 15, fontWeight: '900', textAlign: 'center' },
+  actionTileTitleTeal: {
+    color: colors.tealDark,
+    fontSize: 15,
+    fontWeight: '900',
+    textAlign: 'center',
+  },
+  actionTileTitleNavy: {
+    color: colors.navy,
+    fontSize: 15,
+    fontWeight: '900',
+    textAlign: 'center',
+  },
+  actionTileTitleFavorite: {
+    color: '#0A7A70',
+    fontSize: 15,
+    fontWeight: '900',
+    textAlign: 'center',
+  },
+  actionTileTitleDanger: {
     color: colors.red,
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '900',
+    textAlign: 'center',
   },
-  shareAction: {
+  shareWideButton: {
     backgroundColor: colors.navy,
-    borderRadius: 18,
-    minHeight: 54,
+    borderRadius: 20,
+    minHeight: 58,
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: 16,
   },
-  shareActionText: {
-    color: colors.white,
-    fontSize: 16,
-    fontWeight: '900',
-  },
+  shareWideButtonText: { color: colors.white, fontSize: 16, fontWeight: '900' },
   reasonCard: {
     backgroundColor: colors.white,
     borderRadius: 26,
@@ -1055,12 +944,7 @@ favoriteActionText: {
     padding: 16,
     marginBottom: 16,
   },
-  reasonTitle: {
-    color: colors.navy,
-    fontSize: 22,
-    fontWeight: '900',
-    textAlign: 'right',
-  },
+  reasonTitle: { color: colors.navy, fontSize: 22, fontWeight: '900', textAlign: 'right' },
   reasonText: {
     color: colors.muted,
     fontSize: 14,
@@ -1070,86 +954,25 @@ favoriteActionText: {
     marginTop: 8,
     marginBottom: 14,
   },
-  reasonItem: {
+  reasonCompactRow: {
     flexDirection: 'row-reverse',
     alignItems: 'center',
     gap: 12,
     backgroundColor: '#F8FAFC',
-    borderRadius: 18,
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: colors.border,
-    padding: 12,
-    marginTop: 10,
+    padding: 11,
+    marginTop: 9,
   },
-  reasonIconBox: {
-    width: 54,
-    height: 54,
-    borderRadius: 17,
-    backgroundColor: '#E6FFFA',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  reasonIcon: {
-    fontSize: 28,
-  },
-  reasonTextBox: {
-    flex: 1,
-    alignItems: 'flex-end',
-  },
-  reasonItemTitle: {
-    color: colors.navy,
-    fontSize: 16,
-    fontWeight: '900',
-    textAlign: 'right',
-  },
+  reasonCompactIcon: { fontSize: 24, width: 36, textAlign: 'center' },
+  reasonCompactTextBox: { flex: 1, alignItems: 'flex-end' },
+  reasonItemTitle: { color: colors.navy, fontSize: 15, fontWeight: '900', textAlign: 'right' },
   reasonItemText: {
     color: colors.muted,
     fontSize: 14,
     fontWeight: '800',
     textAlign: 'right',
-    marginTop: 4,
-  },
-  infoCard: {
-    backgroundColor: colors.white,
-    borderRadius: 26,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: 16,
-    marginBottom: 16,
-  },
-  infoTitle: {
-    color: colors.navy,
-    fontSize: 22,
-    fontWeight: '900',
-    textAlign: 'right',
-    marginBottom: 8,
-  },
-  infoRow: {
-    borderTopWidth: 1,
-    borderTopColor: '#EEF2F7',
-    paddingVertical: 14,
-    alignItems: 'flex-end',
-  },
-  infoLabel: {
-    color: colors.muted,
-    fontSize: 13,
-    fontWeight: '800',
-    textAlign: 'right',
-    marginBottom: 5,
-  },
-  infoValue: {
-    color: colors.navy,
-    fontSize: 15,
-    fontWeight: '900',
-    textAlign: 'right',
-    lineHeight: 23,
-  },
-  footerNote: {
-    color: colors.muted,
-    textAlign: 'center',
-    fontSize: 13,
-    fontWeight: '700',
-    lineHeight: 21,
     marginTop: 4,
   },
   modalBackdrop: {
@@ -1161,7 +984,7 @@ favoriteActionText: {
     backgroundColor: colors.bg,
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
-    maxHeight: '82%',
+    maxHeight: '84%',
     paddingTop: 10,
     paddingHorizontal: 16,
     paddingBottom: 22,
@@ -1181,17 +1004,16 @@ favoriteActionText: {
     gap: 12,
     marginBottom: 12,
   },
-  reviewsTitleBox: {
-    flex: 1,
-    alignItems: 'flex-end',
-  },
-  reviewsTitle: {
-    color: colors.navy,
-    fontSize: 23,
+  reviewsTitleBox: { flex: 1, alignItems: 'flex-end' },
+  reviewsTitle: { color: colors.navy, fontSize: 23, fontWeight: '900', textAlign: 'right' },
+  reviewsSubtitle: {
+    color: colors.text,
+    fontSize: 14,
     fontWeight: '900',
     textAlign: 'right',
+    marginTop: 4,
   },
-  reviewsSubtitle: {
+  reviewsMeta: {
     color: colors.muted,
     fontSize: 13,
     fontWeight: '800',
@@ -1204,22 +1026,41 @@ favoriteActionText: {
     paddingVertical: 10,
     paddingHorizontal: 15,
   },
-  closeButtonText: {
-    color: colors.white,
+  closeButtonText: { color: colors.white, fontWeight: '900' },
+  reviewsList: { flexGrow: 0 },
+  reviewsListContent: { paddingBottom: 8 },
+  reviewsSummaryCard: {
+    backgroundColor: colors.navy,
+    borderRadius: 22,
+    padding: 16,
+    marginBottom: 12,
+  },
+  reviewsSummaryTitle: {
+    color: colors.gold,
+    fontSize: 16,
     fontWeight: '900',
+    textAlign: 'right',
   },
-  reviewsList: {
-    flexGrow: 0,
+  reviewsSummaryMain: {
+    color: colors.white,
+    fontSize: 22,
+    fontWeight: '900',
+    textAlign: 'right',
+    marginTop: 8,
   },
-  reviewsListContent: {
-    paddingBottom: 8,
+  reviewsSummarySub: {
+    color: '#CBD5E1',
+    fontSize: 13,
+    fontWeight: '800',
+    textAlign: 'right',
+    marginTop: 4,
   },
   reviewCard: {
     backgroundColor: colors.white,
     borderRadius: 22,
     borderWidth: 1,
     borderColor: colors.border,
-    padding: 14,
+    padding: 15,
     marginBottom: 12,
   },
   reviewTopRow: {
@@ -1236,34 +1077,22 @@ favoriteActionText: {
     justifyContent: 'center',
     alignItems: 'center',
   },
-  reviewAvatarText: {
-    color: colors.navy,
-    fontSize: 20,
-    fontWeight: '900',
+  reviewAvatarText: { color: colors.navy, fontSize: 20, fontWeight: '900' },
+  reviewHeaderText: { flex: 1, alignItems: 'flex-end' },
+  reviewAuthor: { color: colors.navy, fontSize: 16, fontWeight: '900', textAlign: 'right' },
+  reviewMetaRow: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: 8,
+    flexWrap: 'wrap',
+    marginTop: 5,
   },
-  reviewHeaderText: {
-    flex: 1,
-    alignItems: 'flex-end',
-  },
-  reviewAuthor: {
-    color: colors.navy,
-    fontSize: 16,
-    fontWeight: '900',
-    textAlign: 'right',
-  },
-  reviewRating: {
-    color: colors.gold,
-    fontSize: 14,
-    fontWeight: '900',
-    textAlign: 'right',
-    marginTop: 4,
-  },
-  reviewTime: {
-    color: colors.muted,
-    fontSize: 12,
-    fontWeight: '800',
-    textAlign: 'right',
-    marginTop: 3,
+  reviewRating: { color: colors.gold, fontSize: 14, fontWeight: '900', textAlign: 'right' },
+  reviewTime: { color: colors.muted, fontSize: 12, fontWeight: '800', textAlign: 'right' },
+  reviewDivider: {
+    height: 1,
+    backgroundColor: '#EEF2F7',
+    marginBottom: 10,
   },
   reviewText: {
     color: colors.text,
@@ -1280,10 +1109,7 @@ favoriteActionText: {
     padding: 22,
     alignItems: 'center',
   },
-  noReviewsIcon: {
-    fontSize: 42,
-    marginBottom: 8,
-  },
+  noReviewsIcon: { fontSize: 42, marginBottom: 8 },
   noReviewsTitle: {
     color: colors.navy,
     fontSize: 20,
@@ -1306,9 +1132,5 @@ favoriteActionText: {
     paddingHorizontal: 18,
     marginTop: 16,
   },
-  openMapsReviewsButtonText: {
-    color: colors.navy,
-    fontWeight: '900',
-    fontSize: 15,
-  },
+  openMapsReviewsButtonText: { color: colors.navy, fontWeight: '900', fontSize: 15 },
 });

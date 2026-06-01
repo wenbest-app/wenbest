@@ -5,6 +5,7 @@ import {
   ActivityIndicator,
   Image,
   Linking,
+  Modal,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -14,7 +15,7 @@ import {
   View,
 } from 'react-native';
 
-import { getCityByKey } from '../../lib/cities';
+import { cities, getCityByKey } from '../../lib/cities';
 import {
   calculateWenBestScore,
   PlaceResult,
@@ -42,6 +43,8 @@ type UserLocation = {
   latitude: number;
   longitude: number;
 };
+
+type SortMode = 'best' | 'rating' | 'reviews' | 'nearest';
 
 function getCategoryArabic(category: string) {
   const names: Record<string, string> = {
@@ -99,25 +102,11 @@ function formatDistance(distance: number | null) {
 function getOpenStatus(place: PlaceResult) {
   const raw = place.raw ?? {};
 
-  if (raw.open_status) {
-    return raw.open_status;
-  }
-
-  if (raw.opening_hours?.open_now === true) {
-    return 'مفتوح الآن';
-  }
-
-  if (raw.opening_hours?.open_now === false) {
-    return 'مغلق الآن';
-  }
-
-  if (raw.current_opening_hours?.open_now === true) {
-    return 'مفتوح الآن';
-  }
-
-  if (raw.current_opening_hours?.open_now === false) {
-    return 'مغلق الآن';
-  }
+  if (raw.open_status) return raw.open_status;
+  if (raw.opening_hours?.open_now === true) return 'مفتوح الآن';
+  if (raw.opening_hours?.open_now === false) return 'مغلق الآن';
+  if (raw.current_opening_hours?.open_now === true) return 'مفتوح الآن';
+  if (raw.current_opening_hours?.open_now === false) return 'مغلق الآن';
 
   return 'غير متوفر';
 }
@@ -179,9 +168,8 @@ export default function ResultsScreen() {
   const [locating, setLocating] = useState(false);
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
   const [userDistances, setUserDistances] = useState<Record<string, number>>({});
-  const [activeSort, setActiveSort] = useState<
-    'best' | 'rating' | 'reviews' | 'nearest'
-  >('best');
+  const [activeSort, setActiveSort] = useState<SortMode>('best');
+  const [cityModalVisible, setCityModalVisible] = useState(false);
 
   const pageSubtitle = optionGroup
     ? `${optionGroup} • ${option} • ${selectedCity.nameAr}`
@@ -190,6 +178,21 @@ export default function ResultsScreen() {
   useEffect(() => {
     loadResults();
   }, [category, option, cityKey, query]);
+
+  function changeCity(nextCityKey: string) {
+    setCityModalVisible(false);
+
+    router.replace({
+      pathname: '/results',
+      params: {
+        category,
+        option,
+        optionGroup,
+        query,
+        city: nextCityKey,
+      },
+    });
+  }
 
   function getEffectiveDistance(place: PlaceResult) {
     if (activeSort === 'nearest') {
@@ -235,7 +238,6 @@ export default function ResultsScreen() {
 
       if (permission.status !== 'granted') {
         setActiveSort('nearest');
-        setIsError(false);
         setMessage('لم يتم تفعيل الموقع، سيتم ترتيب الأقرب حسب مركز المدينة المختارة.');
         return;
       }
@@ -252,11 +254,9 @@ export default function ResultsScreen() {
       setUserLocation(currentLocation);
       calculateUserDistances(currentLocation, places);
       setActiveSort('nearest');
-      setIsError(false);
       setMessage('تم تفعيل موقعك الحالي، ويتم الآن ترتيب النتائج حسب الأقرب لك فعليًا.');
-    } catch (error: any) {
+    } catch {
       setActiveSort('nearest');
-      setIsError(false);
       setMessage('تعذر تحديد موقعك الحالي، سيتم ترتيب الأقرب حسب مركز المدينة المختارة.');
     } finally {
       setLocating(false);
@@ -338,17 +338,15 @@ export default function ResultsScreen() {
           const nextFavoriteIds: Record<string, boolean> = {};
 
           favoritesData.forEach((item) => {
-            if (item.place_id) {
-              nextFavoriteIds[item.place_id] = true;
-            }
+            if (item.place_id) nextFavoriteIds[item.place_id] = true;
           });
 
           setFavoriteIds(nextFavoriteIds);
         }
       }
-    } catch (error: any) {
+    } catch {
       setIsError(true);
-      setMessage(error?.message ?? 'حدث خطأ أثناء تحميل النتائج.');
+      setMessage('تعذر الاتصال بالخدمة. تأكد من الإنترنت ثم حاول مرة أخرى.');
       setPlaces([]);
       setFavoriteIds({});
     } finally {
@@ -451,7 +449,7 @@ export default function ResultsScreen() {
 
     if (error) {
       setIsError(true);
-      setMessage(`خطأ في الحفظ: ${error.message}`);
+      setMessage('تعذر حفظ المكان. حاول مرة أخرى.');
       return;
     }
 
@@ -460,7 +458,6 @@ export default function ResultsScreen() {
       [place.id]: true,
     }));
 
-    setIsError(false);
     setMessage(`تم حفظ "${place.name}" في المفضلة.`);
   }
 
@@ -487,7 +484,7 @@ export default function ResultsScreen() {
 
     if (error) {
       setIsError(true);
-      setMessage(`خطأ في الحذف: ${error.message}`);
+      setMessage('تعذر حذف المكان من المفضلة. حاول مرة أخرى.');
       return;
     }
 
@@ -497,7 +494,6 @@ export default function ResultsScreen() {
       return next;
     });
 
-    setIsError(false);
     setMessage(`تم حذف "${place.name}" من المفضلة.`);
   }
 
@@ -509,7 +505,7 @@ export default function ResultsScreen() {
     }
   }
 
-  function handleSortPress(value: 'best' | 'rating' | 'reviews' | 'nearest') {
+  function handleSortPress(value: SortMode) {
     if (value === 'nearest') {
       activateNearestSort();
       return;
@@ -520,11 +516,7 @@ export default function ResultsScreen() {
     setActiveSort(value);
   }
 
-  function renderSortButton(
-    label: string,
-    value: 'best' | 'rating' | 'reviews' | 'nearest',
-    icon: string
-  ) {
+  function renderSortButton(label: string, value: SortMode, icon: string) {
     const active = activeSort === value;
 
     return (
@@ -614,7 +606,9 @@ export default function ResultsScreen() {
           </View>
 
           <View style={styles.metaItem}>
-            <Text style={styles.metaText}>{getOpenStatusIcon(openStatus)} {openStatus}</Text>
+            <Text style={styles.metaText}>
+              {getOpenStatusIcon(openStatus)} {openStatus}
+            </Text>
             <Text style={styles.metaLabel}>الدوام</Text>
           </View>
 
@@ -625,34 +619,24 @@ export default function ResultsScreen() {
         </View>
 
         <View style={styles.actionsRow}>
-          <TouchableOpacity style={styles.primaryAction} onPress={() => openDirections(place)}>
-            <Text style={styles.primaryActionText}>الاتجاهات</Text>
-          </TouchableOpacity>
+  <TouchableOpacity style={styles.primaryAction} onPress={() => openDetails(place)}>
+    <Text style={styles.primaryActionText}>اضغط لفتح التفاصيل</Text>
+  </TouchableOpacity>
 
-          <TouchableOpacity style={styles.secondaryAction} onPress={() => openDetails(place)}>
-            <Text style={styles.secondaryActionText}>التفاصيل</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.actionsRow}>
-          <TouchableOpacity style={styles.mapAction} onPress={() => openGoogleMaps(place)}>
-            <Text style={styles.mapActionText}>افتح في الخرائط</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.saveAction, isFavorite && styles.removeFavoriteAction]}
-            onPress={() => toggleFavorite(place)}
-            disabled={savingId === place.id}
-          >
-            <Text style={[styles.saveActionText, isFavorite && styles.removeFavoriteActionText]}>
-              {savingId === place.id
-                ? 'جاري التنفيذ...'
-                : isFavorite
-                  ? 'حذف من المفضلة'
-                  : 'حفظ في المفضلة'}
-            </Text>
-          </TouchableOpacity>
-        </View>
+  <TouchableOpacity
+    style={[styles.saveAction, isFavorite && styles.removeFavoriteAction]}
+    onPress={() => toggleFavorite(place)}
+    disabled={savingId === place.id}
+  >
+    <Text style={[styles.saveActionText, isFavorite && styles.removeFavoriteActionText]}>
+      {savingId === place.id
+        ? 'جاري التنفيذ...'
+        : isFavorite
+          ? 'حذف من المفضلة'
+          : 'حفظ في المفضلة'}
+    </Text>
+  </TouchableOpacity>
+</View>
       </View>
     );
   }
@@ -679,9 +663,12 @@ export default function ResultsScreen() {
           <Text style={styles.pageSubtitle}>{pageSubtitle}</Text>
 
           <View style={styles.headerPills}>
-            <View style={styles.headerPill}>
-              <Text style={styles.headerPillText}>📍 {selectedCity.nameAr}</Text>
-            </View>
+            <TouchableOpacity
+              style={styles.headerPill}
+              onPress={() => setCityModalVisible(true)}
+            >
+              <Text style={styles.headerPillText}>📍 {selectedCity.nameAr} ▼</Text>
+            </TouchableOpacity>
 
             <View style={styles.headerPillGold}>
               <Text style={styles.headerPillGoldText}>{sortedPlaces.length} نتيجة</Text>
@@ -727,22 +714,22 @@ export default function ResultsScreen() {
         ) : null}
 
         {!loading && bestPlace ? (
-          <View style={styles.bestBox}>
-            <Text style={styles.bestLabel}>{getFeaturedTitle()}</Text>
-            {renderPlaceCard(bestPlace, 0, true)}
-          </View>
-        ) : null}
+  <View style={styles.featuredSection}>
+    <Text style={styles.bestLabel}>{getFeaturedTitle()}</Text>
+    {renderPlaceCard(bestPlace, 0, true)}
+  </View>
+) : null}
 
         {!loading && sortedPlaces.length > 0 ? (
-          <View style={styles.listSection}>
-            <Text style={styles.listTitle}>قائمة النتائج</Text>
-            <Text style={styles.listCount}>{sortedPlaces.length} مكان</Text>
+  <View style={styles.listSection}>
+    <Text style={styles.listTitle}>قائمة النتائج</Text>
+    <Text style={styles.listCount}>{Math.max(sortedPlaces.length - 1, 0)} مكان</Text>
 
-            <View style={styles.resultsList}>
-              {sortedPlaces.map((place, index) => renderPlaceCard(place, index))}
-            </View>
-          </View>
-        ) : null}
+    <View style={styles.resultsList}>
+      {sortedPlaces.slice(1).map((place, index) => renderPlaceCard(place, index + 1))}
+    </View>
+  </View>
+) : null}
 
         {!loading && sortedPlaces.length === 0 ? (
           <View style={styles.emptyBox}>
@@ -758,6 +745,53 @@ export default function ResultsScreen() {
           خيار الأقرب إلي يستخدم موقعك الحالي فقط عند الضغط عليه، أما باقي الخيارات فتعتمد على المدينة المختارة.
         </Text>
       </ScrollView>
+
+      <Modal
+        visible={cityModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setCityModalVisible(false)}
+      >
+        <View style={styles.modalBackdrop}>
+          <View style={styles.cityModalBox}>
+            <Text style={styles.cityModalTitle}>اختر المدينة</Text>
+            <Text style={styles.cityModalSubtitle}>
+              سيتم تحديث النتائج حسب المدينة المختارة
+            </Text>
+
+            <View style={styles.cityModalList}>
+              {cities.map((city) => {
+                const active = city.key === cityKey;
+
+                return (
+                  <TouchableOpacity
+                    key={city.key}
+                    style={[styles.cityModalChip, active && styles.cityModalChipActive]}
+                    onPress={() => changeCity(city.key)}
+                  >
+                    <Text
+                      style={[
+                        styles.cityModalChipText,
+                        active && styles.cityModalChipTextActive,
+                      ]}
+                    >
+                      {active ? '✓ ' : ''}
+                      {city.nameAr}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+
+            <TouchableOpacity
+              style={styles.cityModalCancel}
+              onPress={() => setCityModalVisible(false)}
+            >
+              <Text style={styles.cityModalCancelText}>إلغاء</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -962,22 +996,15 @@ const styles = StyleSheet.create({
   errorText: {
     color: colors.red,
   },
-  bestBox: {
-    backgroundColor: colors.navy,
-    borderRadius: 28,
-    padding: 14,
-    marginBottom: 18,
-  },
+  featuredSection: {
+  marginBottom: 16,
+},
   bestLabel: {
     color: colors.gold,
     fontSize: 17,
     fontWeight: '900',
     textAlign: 'right',
     marginBottom: 12,
-  },
-  featuredResultCard: {
-    backgroundColor: '#0B2B5B',
-    borderColor: '#123B78',
   },
   resultCard: {
     backgroundColor: colors.white,
@@ -986,6 +1013,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     marginBottom: 14,
+  },
+  featuredResultCard: {
+    backgroundColor: '#0B2B5B',
+    borderColor: '#123B78',
   },
   resultTopRow: {
     flexDirection: 'row-reverse',
@@ -1163,10 +1194,15 @@ const styles = StyleSheet.create({
     color: colors.white,
     fontWeight: '900',
   },
+  removeFavoriteAction: {
+    backgroundColor: '#FEF2F2',
+    borderWidth: 1,
+    borderColor: '#FECACA',
+  },
   removeFavoriteActionText: {
-  color: colors.red,
-  fontWeight: '900',
-},
+    color: colors.red,
+    fontWeight: '900',
+  },
   listSection: {
     marginTop: 4,
   },
@@ -1222,9 +1258,104 @@ const styles = StyleSheet.create({
     lineHeight: 21,
     marginTop: 18,
   },
-  removeFavoriteAction: {
-  backgroundColor: '#FEF2F2',
-  borderWidth: 1,
-  borderColor: '#FECACA',
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(6, 33, 74, 0.55)',
+    justifyContent: 'center',
+    padding: 18,
+  },
+  cityModalBox: {
+    backgroundColor: colors.white,
+    borderRadius: 26,
+    padding: 18,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  cityModalTitle: {
+    color: colors.navy,
+    fontSize: 24,
+    fontWeight: '900',
+    textAlign: 'right',
+  },
+  cityModalSubtitle: {
+    color: colors.muted,
+    fontSize: 14,
+    fontWeight: '700',
+    textAlign: 'right',
+    marginTop: 6,
+    marginBottom: 14,
+  },
+  cityModalList: {
+    gap: 10,
+  },
+  cityModalChip: {
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 16,
+    paddingVertical: 13,
+    paddingHorizontal: 14,
+    alignItems: 'flex-end',
+  },
+  cityModalChipActive: {
+    backgroundColor: '#E6FFFA',
+    borderColor: '#99F6E4',
+  },
+  cityModalChipText: {
+    color: colors.navy,
+    fontSize: 16,
+    fontWeight: '900',
+    textAlign: 'right',
+  },
+  cityModalChipTextActive: {
+    color: colors.tealDark,
+  },
+  cityModalCancel: {
+    backgroundColor: colors.navy,
+    borderRadius: 16,
+    height: 48,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 14,
+  },
+  bestSummaryBox: {
+  backgroundColor: colors.navy,
+  borderRadius: 20,
+  paddingVertical: 14,
+  paddingHorizontal: 18,
+  marginBottom: 16,
+  alignItems: 'flex-end',
 },
+bestSummaryTitle: {
+  color: colors.gold,
+  fontSize: 16,
+  fontWeight: '900',
+  textAlign: 'right',
+},
+bestSummaryName: {
+  color: colors.white,
+  fontSize: 20,
+  fontWeight: '900',
+  textAlign: 'right',
+  marginTop: 6,
+},
+bestSummaryMeta: {
+  color: '#CBD5E1',
+  fontSize: 13,
+  fontWeight: '700',
+  textAlign: 'right',
+  marginTop: 4,
+},
+bestSummaryHint: {
+  color: colors.gold,
+  fontSize: 12,
+  fontWeight: '800',
+  textAlign: 'right',
+  marginTop: 8,
+},
+  cityModalCancelText: {
+    color: colors.white,
+    fontSize: 16,
+    fontWeight: '900',
+  },
 });
