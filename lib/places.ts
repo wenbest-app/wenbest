@@ -88,6 +88,7 @@ function getCategoryArabic(category: string) {
     home_services: 'خدمات منزلية',
     laundries: 'مغاسل',
     hotels_apartments: 'فنادق وشقق فندقية',
+    travel_tourism: 'وكالات السفر والسياحة',
   };
 
   return names[category] ?? category;
@@ -212,6 +213,8 @@ function getGoogleSearchText(category: string, option: string, query?: string) {
     renault: 'Renault garage',
     fiat: 'Fiat garage',
     'alfa romeo': 'Alfa Romeo garage',
+    'سيارات فاخرة ورياضيه': 'luxury sports car garage',
+'سيارات فاخرة ورياضية': 'luxury sports car garage',
 
     // Garage services
     'فحص كمبيوتر': 'car diagnostic garage',
@@ -289,6 +292,24 @@ function getGoogleSearchText(category: string, option: string, query?: string) {
     سجاد: 'carpet cleaning',
     'مغسله سيارات': 'car wash',
 
+
+    // Travel and tourism
+    'حجوزات طيران': 'travel agency flight tickets',
+    'باقات سياحيه': 'tourism agency tour packages',
+    'باقات سياحية': 'tourism agency tour packages',
+    'سياحه داخل الامارات': 'UAE tour agency local tours',
+    'سياحة داخل الإمارات': 'UAE tour agency local tours',
+    'سياحه خارجيه': 'travel agency international tours',
+    'سياحة خارجية': 'travel agency international tours',
+    'تاشيرات سفر': 'visa services travel agency',
+    'تأشيرات سفر': 'visa services travel agency',
+    عمره: 'Umrah travel agency',
+    عمرة: 'Umrah travel agency',
+    'رحلات بحريه': 'cruise travel agency',
+    'رحلات بحرية': 'cruise travel agency',
+    'تاجير سيارات للسفر': 'travel car rental',
+    'تأجير سيارات للسفر': 'travel car rental',
+
     // Hotels
     فنادق: 'hotel',
     فندق: 'hotel',
@@ -341,6 +362,10 @@ function getGoogleSearchText(category: string, option: string, query?: string) {
     return option === 'أفضل اختيار' ? 'best hotels hotel apartments' : `${option}`;
   }
 
+  if (category === 'travel_tourism') {
+    return option === 'أفضل اختيار' ? 'travel agency tourism agency' : `${option} travel agency`;
+  }
+
   return option || getCategoryArabic(category);
 }
 
@@ -355,6 +380,7 @@ function getCategoryGoogleType(category: string) {
     home_services: '',
     laundries: 'laundry',
     hotels_apartments: 'lodging',
+    travel_tourism: 'travel_agency',
   };
 
   return types[category] ?? '';

@@ -68,6 +68,187 @@ const internationalRestaurantChainsSection: OptionSection = {
   ],
 };
 
+
+const garageJapaneseSection: OptionSection = {
+  title: 'سيارات يابانية',
+  subtitle: 'اختر ماركة السيارة اليابانية',
+  options: [
+    { title: 'Toyota', subtitle: 'تويوتا', option: 'Toyota', icon: 'T', badge: 'ياباني' },
+    { title: 'Lexus', subtitle: 'لكزس', option: 'Lexus', icon: 'L', badge: 'ياباني' },
+    { title: 'Nissan', subtitle: 'نيسان', option: 'Nissan', icon: 'N', badge: 'ياباني' },
+    { title: 'Infiniti', subtitle: 'إنفينيتي', option: 'Infiniti', icon: 'I', badge: 'ياباني' },
+    { title: 'Honda', subtitle: 'هوندا', option: 'Honda', icon: 'H', badge: 'ياباني' },
+    { title: 'Mazda', subtitle: 'مازدا', option: 'Mazda', icon: 'M', badge: 'ياباني' },
+    { title: 'Mitsubishi', subtitle: 'ميتسوبيشي', option: 'Mitsubishi', icon: 'M', badge: 'ياباني' },
+    { title: 'Subaru', subtitle: 'سوبارو', option: 'Subaru', icon: 'S', badge: 'ياباني' },
+    { title: 'Suzuki', subtitle: 'سوزوكي', option: 'Suzuki', icon: 'S', badge: 'ياباني' },
+  ],
+};
+
+const garageAmericanSection: OptionSection = {
+  title: 'سيارات أمريكية',
+  subtitle: 'اختر ماركة السيارة الأمريكية',
+  options: [
+    { title: 'GMC', subtitle: 'جي إم سي', option: 'GMC', icon: 'G', badge: 'أمريكي' },
+    { title: 'Chevrolet', subtitle: 'شفروليه', option: 'Chevrolet', icon: 'C', badge: 'أمريكي' },
+    { title: 'Ford', subtitle: 'فورد', option: 'Ford', icon: 'F', badge: 'أمريكي' },
+    { title: 'Jeep', subtitle: 'جيب', option: 'Jeep', icon: 'J', badge: 'أمريكي' },
+    { title: 'Cadillac', subtitle: 'كاديلاك', option: 'Cadillac', icon: 'C', badge: 'أمريكي' },
+    { title: 'Dodge', subtitle: 'دودج', option: 'Dodge', icon: 'D', badge: 'أمريكي' },
+    { title: 'Chrysler', subtitle: 'كرايسلر', option: 'Chrysler', icon: 'C', badge: 'أمريكي' },
+    { title: 'Tesla', subtitle: 'تسلا', option: 'Tesla', icon: 'T', badge: 'أمريكي' },
+  ],
+};
+
+const garageEuropeanSection: OptionSection = {
+  title: 'سيارات ألمانية وأوروبية',
+  subtitle: 'اختر ماركة السيارة الأوروبية',
+  options: [
+    { title: 'Mercedes', subtitle: 'مرسيدس', option: 'Mercedes', icon: 'M', badge: 'ألماني' },
+    { title: 'BMW', subtitle: 'بي إم دبليو', option: 'BMW', icon: 'B', badge: 'ألماني' },
+    { title: 'Audi', subtitle: 'أودي', option: 'Audi', icon: 'A', badge: 'ألماني' },
+    { title: 'Porsche', subtitle: 'بورشه', option: 'Porsche', icon: 'P', badge: 'ألماني' },
+    { title: 'Volkswagen', subtitle: 'فولكس واجن', option: 'Volkswagen', icon: 'V', badge: 'ألماني' },
+    { title: 'Mini', subtitle: 'ميني كوبر', option: 'Mini', icon: 'M', badge: 'أوروبي' },
+    { title: 'Range Rover', subtitle: 'رينج روفر', option: 'Range Rover', icon: 'R', badge: 'بريطاني' },
+    { title: 'Land Rover', subtitle: 'لاند روفر', option: 'Land Rover', icon: 'L', badge: 'بريطاني' },
+    { title: 'Jaguar', subtitle: 'جاكوار', option: 'Jaguar', icon: 'J', badge: 'بريطاني' },
+    { title: 'Volvo', subtitle: 'فولفو', option: 'Volvo', icon: 'V', badge: 'أوروبي' },
+    { title: 'Peugeot', subtitle: 'بيجو', option: 'Peugeot', icon: 'P', badge: 'فرنسي' },
+    { title: 'Renault', subtitle: 'رينو', option: 'Renault', icon: 'R', badge: 'فرنسي' },
+    { title: 'Fiat', subtitle: 'فيات', option: 'Fiat', icon: 'F', badge: 'إيطالي' },
+  ],
+};
+
+const garageKoreanSection: OptionSection = {
+  title: 'سيارات كورية',
+  subtitle: 'اختر ماركة السيارة الكورية',
+  options: [
+    { title: 'Hyundai', subtitle: 'هيونداي', option: 'Hyundai', icon: 'H', badge: 'كوري' },
+    { title: 'Kia', subtitle: 'كيا', option: 'Kia', icon: 'K', badge: 'كوري' },
+    { title: 'Genesis', subtitle: 'جينيسيس', option: 'Genesis', icon: 'G', badge: 'كوري' },
+  ],
+};
+
+const garageChineseSection: OptionSection = {
+  title: 'سيارات صينية',
+  subtitle: 'اختر ماركة السيارة الصينية',
+  options: [
+    { title: 'BYD', subtitle: 'بي واي دي', option: 'BYD', icon: 'B', badge: 'صيني' },
+    { title: 'Geely', subtitle: 'جيلي', option: 'Geely', icon: 'G', badge: 'صيني' },
+    { title: 'Jetour', subtitle: 'جيتور', option: 'Jetour', icon: 'J', badge: 'صيني' },
+    { title: 'Chery', subtitle: 'شيري', option: 'Chery', icon: 'C', badge: 'صيني' },
+    { title: 'Haval', subtitle: 'هافال', option: 'Haval', icon: 'H', badge: 'صيني' },
+    { title: 'GAC', subtitle: 'جي ايه سي', option: 'GAC', icon: 'G', badge: 'صيني' },
+    { title: 'Changan', subtitle: 'شانجان', option: 'Changan', icon: 'C', badge: 'صيني' },
+    { title: 'Exeed', subtitle: 'إكسيد', option: 'Exeed', icon: 'E', badge: 'صيني' },
+    { title: 'Hongqi', subtitle: 'هونغتشي', option: 'Hongqi', icon: 'H', badge: 'صيني' },
+  ],
+};
+
+const garageElectricSection: OptionSection = {
+  title: 'سيارات كهربائية',
+  subtitle: 'اختر ماركة السيارة الكهربائية',
+  options: [
+    { title: 'Tesla', subtitle: 'تسلا', option: 'Tesla', icon: 'T', badge: 'كهربائي' },
+    { title: 'BYD', subtitle: 'بي واي دي', option: 'BYD', icon: 'B', badge: 'كهربائي' },
+    { title: 'Lucid', subtitle: 'لوسيد', option: 'Lucid', icon: 'L', badge: 'كهربائي' },
+    { title: 'Rivian', subtitle: 'ريفيان', option: 'Rivian', icon: 'R', badge: 'كهربائي' },
+    { title: 'Polestar', subtitle: 'بولستار', option: 'Polestar', icon: 'P', badge: 'كهربائي' },
+  ],
+};
+
+const garageLuxurySportsSection: OptionSection = {
+  title: 'سيارات فاخرة ورياضية',
+  subtitle: 'كراجات متخصصة في السيارات الفاخرة والرياضية',
+  options: [
+    {
+      title: 'سيارات فاخرة ورياضية',
+      subtitle: 'Supercars / Luxury / Performance',
+      option: 'سيارات فاخرة ورياضية',
+      icon: '🏎️',
+      badge: 'فاخرة ورياضية',
+    },
+  ],
+};
+
+const garageServicesSection: OptionSection = {
+  title: 'خدمات السيارات',
+  subtitle: 'اختر نوع الخدمة المطلوبة',
+  options: [
+    { title: 'فحص كمبيوتر', subtitle: 'تشخيص أعطال', option: 'فحص كمبيوتر', icon: '💻' },
+    { title: 'فحص شامل', subtitle: 'فحص عام', option: 'فحص شامل', icon: '🔍' },
+    { title: 'فحص قبل الشراء', subtitle: 'قبل شراء السيارة', option: 'فحص قبل الشراء', icon: '✅' },
+    { title: 'صيانة دورية', subtitle: 'خدمة وصيانة', option: 'صيانة دورية', icon: '🛠️' },
+    { title: 'تبديل زيوت', subtitle: 'زيوت وفلاتر', option: 'تبديل زيوت', icon: '🛢️' },
+    { title: 'قير / جير', subtitle: 'تصليح الجير', option: 'قير / جير', icon: '⚙️' },
+    { title: 'مكينة', subtitle: 'تصليح المحرك', option: 'مكينة', icon: '🔩' },
+    { title: 'كهرباء سيارات', subtitle: 'كهرباء وبرمجة', option: 'كهرباء سيارات', icon: '⚡' },
+    { title: 'مكيفات سيارات', subtitle: 'تبريد وتكييف', option: 'مكيفات سيارات', icon: '❄️' },
+    { title: 'بطارية', subtitle: 'بطاريات سيارات', option: 'بطارية', icon: '🔋' },
+    { title: 'إطارات', subtitle: 'تايرات وميزان', option: 'إطارات', icon: '🛞' },
+    { title: 'سمكرة وصبغ', subtitle: 'بودي ودهان', option: 'سمكرة وصبغ', icon: '🎨' },
+    { title: 'تلميع', subtitle: 'تنظيف وتلميع', option: 'تلميع', icon: '✨' },
+  ],
+  
+};
+
+
+const garageSubcategoryData: Record<string, CategoryData> = {
+  japanese: {
+    title: 'كراجات السيارات اليابانية',
+    subtitle: 'اختر الماركة اليابانية التي تريد البحث عن كراج متخصص لها',
+    icon: '🇯🇵',
+    sections: [garageJapaneseSection],
+  },
+  american: {
+    title: 'كراجات السيارات الأمريكية',
+    subtitle: 'اختر الماركة الأمريكية التي تريد البحث عن كراج متخصص لها',
+    icon: '🇺🇸',
+    sections: [garageAmericanSection],
+  },
+  european: {
+    title: 'كراجات السيارات الأوروبية',
+    subtitle: 'اختر الماركة الأوروبية التي تريد البحث عن كراج متخصص لها',
+    icon: '🇪🇺',
+    sections: [garageEuropeanSection],
+  },
+  korean: {
+    title: 'كراجات السيارات الكورية',
+    subtitle: 'اختر الماركة الكورية التي تريد البحث عن كراج متخصص لها',
+    icon: '🇰🇷',
+    sections: [garageKoreanSection],
+  },
+  chinese: {
+  title: 'كراجات السيارات الصينية',
+  subtitle: 'اختر الماركة الصينية',
+  icon: '🇨🇳',
+  sections: [garageChineseSection],
+},
+
+electric: {
+  title: 'كراجات السيارات الكهربائية',
+  subtitle: 'اختر الماركة الكهربائية',
+  icon: '⚡',
+  sections: [garageElectricSection],
+},
+
+luxury_sports: {
+  title: 'كراجات السيارات الفاخرة والرياضية',
+  subtitle: 'كراجات متخصصة في السيارات الفاخرة، السوبر كار، والأداء العالي',
+  icon: '🏎️',
+  sections: [garageLuxurySportsSection],
+},
+
+  services: {
+    title: 'خدمات السيارات',
+    subtitle: 'اختر نوع الخدمة المطلوبة للسيارة',
+    icon: '🛠️',
+    sections: [garageServicesSection],
+  },
+  
+};
+
 const categoryData: Record<string, CategoryData> = {
   restaurants: {
     title: 'مطاعم',
@@ -157,96 +338,29 @@ const categoryData: Record<string, CategoryData> = {
 
   garages: {
     title: 'كراجات سيارات',
-    subtitle: 'اختر بلد السيارة ثم الماركة أو الخدمة',
+    subtitle: 'اختر بلد السيارة أولًا ثم اختر الماركة، أو اختر نوع الخدمة مباشرة',
     icon: '🔧',
     sections: [
       {
-        title: 'أفضل اختيار',
-        subtitle: 'ترتيب عام حسب WenBest',
+        title: 'ابدأ من هنا',
+        subtitle: 'اختر طريقة البحث عن الكراج المناسب',
         options: [
           {
             title: 'أفضل اختيار',
-            subtitle: 'أفضل كراجات السيارات',
+            subtitle: 'أفضل كراجات السيارات حسب WenBest',
             option: 'أفضل اختيار',
             icon: '⭐',
             featured: true,
           },
-        ],
-      },
-      {
-        title: 'ياباني',
-        subtitle: 'ماركات يابانية',
-        options: [
-          { title: 'Toyota', subtitle: 'تويوتا', option: 'Toyota', icon: 'T', badge: 'ياباني' },
-          { title: 'Lexus', subtitle: 'لكزس', option: 'Lexus', icon: 'L', badge: 'ياباني' },
-          { title: 'Nissan', subtitle: 'نيسان', option: 'Nissan', icon: 'N', badge: 'ياباني' },
-          { title: 'Infiniti', subtitle: 'إنفينيتي', option: 'Infiniti', icon: 'I', badge: 'ياباني' },
-          { title: 'Honda', subtitle: 'هوندا', option: 'Honda', icon: 'H', badge: 'ياباني' },
-          { title: 'Mazda', subtitle: 'مازدا', option: 'Mazda', icon: 'M', badge: 'ياباني' },
-          { title: 'Mitsubishi', subtitle: 'ميتسوبيشي', option: 'Mitsubishi', icon: 'M', badge: 'ياباني' },
-          { title: 'Subaru', subtitle: 'سوبارو', option: 'Subaru', icon: 'S', badge: 'ياباني' },
-          { title: 'Suzuki', subtitle: 'سوزوكي', option: 'Suzuki', icon: 'S', badge: 'ياباني' },
-        ],
-      },
-      {
-        title: 'أمريكي',
-        subtitle: 'ماركات أمريكية',
-        options: [
-          { title: 'GMC', subtitle: 'جي إم سي', option: 'GMC', icon: 'G', badge: 'أمريكي' },
-          { title: 'Chevrolet', subtitle: 'شفروليه', option: 'Chevrolet', icon: 'C', badge: 'أمريكي' },
-          { title: 'Ford', subtitle: 'فورد', option: 'Ford', icon: 'F', badge: 'أمريكي' },
-          { title: 'Jeep', subtitle: 'جيب', option: 'Jeep', icon: 'J', badge: 'أمريكي' },
-          { title: 'Cadillac', subtitle: 'كاديلاك', option: 'Cadillac', icon: 'C', badge: 'أمريكي' },
-          { title: 'Dodge', subtitle: 'دودج', option: 'Dodge', icon: 'D', badge: 'أمريكي' },
-          { title: 'Chrysler', subtitle: 'كرايسلر', option: 'Chrysler', icon: 'C', badge: 'أمريكي' },
-          { title: 'Tesla', subtitle: 'تسلا', option: 'Tesla', icon: 'T', badge: 'أمريكي' },
-        ],
-      },
-      {
-        title: 'ألماني وأوروبي',
-        subtitle: 'ماركات ألمانية وأوروبية',
-        options: [
-          { title: 'Mercedes', subtitle: 'مرسيدس', option: 'Mercedes', icon: 'M', badge: 'ألماني' },
-          { title: 'BMW', subtitle: 'بي إم دبليو', option: 'BMW', icon: 'B', badge: 'ألماني' },
-          { title: 'Audi', subtitle: 'أودي', option: 'Audi', icon: 'A', badge: 'ألماني' },
-          { title: 'Porsche', subtitle: 'بورشه', option: 'Porsche', icon: 'P', badge: 'ألماني' },
-          { title: 'Volkswagen', subtitle: 'فولكس واجن', option: 'Volkswagen', icon: 'V', badge: 'ألماني' },
-          { title: 'Mini', subtitle: 'ميني كوبر', option: 'Mini', icon: 'M', badge: 'أوروبي' },
-          { title: 'Range Rover', subtitle: 'رينج روفر', option: 'Range Rover', icon: 'R', badge: 'بريطاني' },
-          { title: 'Land Rover', subtitle: 'لاند روفر', option: 'Land Rover', icon: 'L', badge: 'بريطاني' },
-          { title: 'Jaguar', subtitle: 'جاكوار', option: 'Jaguar', icon: 'J', badge: 'بريطاني' },
-          { title: 'Volvo', subtitle: 'فولفو', option: 'Volvo', icon: 'V', badge: 'أوروبي' },
-          { title: 'Peugeot', subtitle: 'بيجو', option: 'Peugeot', icon: 'P', badge: 'فرنسي' },
-          { title: 'Renault', subtitle: 'رينو', option: 'Renault', icon: 'R', badge: 'فرنسي' },
-          { title: 'Fiat', subtitle: 'فيات', option: 'Fiat', icon: 'F', badge: 'إيطالي' },
-        ],
-      },
-      {
-        title: 'كوري',
-        subtitle: 'ماركات كورية',
-        options: [
-          { title: 'Hyundai', subtitle: 'هيونداي', option: 'Hyundai', icon: 'H', badge: 'كوري' },
-          { title: 'Kia', subtitle: 'كيا', option: 'Kia', icon: 'K', badge: 'كوري' },
-          { title: 'Genesis', subtitle: 'جينيسيس', option: 'Genesis', icon: 'G', badge: 'كوري' },
-        ],
-      },
-      {
-        title: 'خدمات السيارات',
-        subtitle: 'اختر نوع الخدمة',
-        options: [
-          { title: 'فحص كمبيوتر', subtitle: 'تشخيص أعطال', option: 'فحص كمبيوتر', icon: '💻' },
-          { title: 'فحص شامل', subtitle: 'فحص عام', option: 'فحص شامل', icon: '🔍' },
-          { title: 'فحص قبل الشراء', subtitle: 'قبل شراء السيارة', option: 'فحص قبل الشراء', icon: '✅' },
-          { title: 'صيانة دورية', subtitle: 'خدمة وصيانة', option: 'صيانة دورية', icon: '🛠️' },
-          { title: 'تبديل زيوت', subtitle: 'زيوت وفلاتر', option: 'تبديل زيوت', icon: '🛢️' },
-          { title: 'قير / جير', subtitle: 'تصليح الجير', option: 'قير / جير', icon: '⚙️' },
-          { title: 'مكينة', subtitle: 'تصليح المحرك', option: 'مكينة', icon: '🔩' },
-          { title: 'كهرباء سيارات', subtitle: 'كهرباء وبرمجة', option: 'كهرباء سيارات', icon: '⚡' },
-          { title: 'مكيفات سيارات', subtitle: 'تبريد وتكييف', option: 'مكيفات سيارات', icon: '❄️' },
-          { title: 'بطارية', subtitle: 'بطاريات سيارات', option: 'بطارية', icon: '🔋' },
-          { title: 'إطارات', subtitle: 'تايرات وميزان', option: 'إطارات', icon: '🛞' },
-          { title: 'سمكرة وصبغ', subtitle: 'بودي ودهان', option: 'سمكرة وصبغ', icon: '🎨' },
-          { title: 'تلميع', subtitle: 'تنظيف وتلميع', option: 'تلميع', icon: '✨' },
+          { title: 'سيارات يابانية', subtitle: 'Toyota، Lexus، Nissan وغيرها', option: '__garage_japanese__', icon: '🇯🇵', badge: 'حسب البلد' },
+          { title: 'سيارات أمريكية', subtitle: 'GMC، Chevrolet، Ford وغيرها', option: '__garage_american__', icon: '🇺🇸', badge: 'حسب البلد' },
+          { title: 'سيارات أوروبية', subtitle: 'Mercedes، BMW، Audi وغيرها', option: '__garage_european__', icon: '🇪🇺', badge: 'حسب البلد' },
+          { title: 'سيارات كورية', subtitle: 'Hyundai، Kia، Genesis', option: '__garage_korean__', icon: '🇰🇷', badge: 'حسب البلد' },
+          { title: 'سيارات صينية', subtitle: 'BYD، Geely، Jetour وغيرها', option: '__garage_chinese__', icon: '🇨🇳', badge: 'حسب البلد' },
+          { title: 'سيارات كهربائية', subtitle: 'Tesla، BYD، Lucid وغيرها', option: '__garage_electric__', icon: '⚡', badge: 'كهربائية' },
+          { title: 'سيارات فاخرة ورياضية', subtitle: 'Supercars، Luxury، Performance', option: '__garage_luxury_sports__', icon: '🏎️', badge: 'فاخرة', },
+          { title: 'خدمات السيارات', subtitle: 'فحص، صيانة، إطارات، كهرباء وغيرها', option: '__garage_services__', icon: '🛠️', badge: 'خدمات' },
+          
         ],
       },
     ],
@@ -365,6 +479,29 @@ const categoryData: Record<string, CategoryData> = {
     ],
   },
 
+
+  travel_tourism: {
+    title: 'وكالات السفر والسياحة',
+    subtitle: 'رحلات، تأشيرات، عمرة وباقات سياحية',
+    icon: '✈️',
+    sections: [
+      {
+        title: 'خدمات السفر والسياحة',
+        options: [
+          { title: 'أفضل اختيار', subtitle: 'الأفضل حسب WenBest', option: 'أفضل اختيار', icon: '⭐', featured: true },
+          { title: 'حجوزات طيران', subtitle: 'تذاكر ورحلات جوية', option: 'حجوزات طيران', icon: '✈️' },
+          { title: 'باقات سياحية', subtitle: 'برامج ورحلات منظمة', option: 'باقات سياحية', icon: '🧳' },
+          { title: 'سياحة داخل الإمارات', subtitle: 'رحلات وتجارب داخل الدولة', option: 'سياحة داخل الإمارات', icon: '🇦🇪' },
+          { title: 'سياحة خارجية', subtitle: 'رحلات خارج الدولة', option: 'سياحة خارجية', icon: '🌍' },
+          { title: 'تأشيرات سفر', subtitle: 'خدمات فيزا ومعاملات سفر', option: 'تأشيرات سفر', icon: '🛂' },
+          { title: 'عمرة', subtitle: 'برامج العمرة والسفر الديني', option: 'عمرة', icon: '🕋' },
+          { title: 'رحلات بحرية', subtitle: 'كروز ورحلات بحرية', option: 'رحلات بحرية', icon: '🚢' },
+          { title: 'تأجير سيارات للسفر', subtitle: 'سيارات للرحلات والتنقل', option: 'تأجير سيارات للسفر', icon: '🚗' },
+        ],
+      },
+    ],
+  },
+
   hotels_apartments: {
     title: 'فنادق وشقق فندقية',
     subtitle: 'إقامة وسكن مؤقت',
@@ -406,7 +543,9 @@ export default function CategoryScreen() {
           icon: '🌍',
           sections: [internationalRestaurantChainsSection],
         }
-      : baseData;
+      : category === 'garages' && garageSubcategoryData[subcategory]
+        ? garageSubcategoryData[subcategory]
+        : baseData;
 
   const isMobile = width < 700;
   const isTablet = width >= 700 && width < 1024;
@@ -436,6 +575,22 @@ export default function CategoryScreen() {
         params: {
           category: 'restaurants',
           subcategory: 'international_chains',
+          city: cityKey,
+        },
+      });
+      return;
+    }
+
+    if (option.startsWith('__garage_')) {
+      const nextSubcategory = option
+        .replace('__garage_', '')
+        .replace('__', '');
+
+      router.push({
+        pathname: '/category',
+        params: {
+          category: 'garages',
+          subcategory: nextSubcategory,
           city: cityKey,
         },
       });

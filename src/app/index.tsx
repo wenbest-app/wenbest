@@ -82,6 +82,12 @@ const categories = [
     category: 'laundries',
   },
   {
+    title: 'وكالات السفر والسياحة',
+    subtitle: 'رحلات، تأشيرات وباقات سياحية',
+    icon: '✈️',
+    category: 'travel_tourism',
+  },
+  {
     title: 'فنادق وشقق فندقية',
     subtitle: 'إقامة وسكن مؤقت',
     icon: '🏨',
@@ -289,6 +295,17 @@ function detectSearchIntent(text: string) {
     { keywords: ['مغسلة سيارات', 'car wash'], category: 'laundries', option: 'مغسلة سيارات' },
     { keywords: ['مغسلة', 'laundries'], category: 'laundries', option: 'أفضل اختيار' },
 
+
+    { keywords: ['وكالة سفر', 'وكالات سفر', 'سفر', 'سياحة', 'travel agency', 'tourism agency'], category: 'travel_tourism', option: 'أفضل اختيار' },
+    { keywords: ['طيران', 'تذاكر', 'flight', 'air ticket'], category: 'travel_tourism', option: 'حجوزات طيران' },
+    { keywords: ['باقات سياحية', 'باقة سياحية', 'tour package', 'holiday package'], category: 'travel_tourism', option: 'باقات سياحية' },
+    { keywords: ['سياحة داخل الامارات', 'سياحة داخل الإمارات', 'uae tour', 'local tour'], category: 'travel_tourism', option: 'سياحة داخل الإمارات' },
+    { keywords: ['سياحة خارجية', 'رحلات خارجية', 'international tour'], category: 'travel_tourism', option: 'سياحة خارجية' },
+    { keywords: ['تأشيرة', 'تاشيرة', 'فيزا', 'visa'], category: 'travel_tourism', option: 'تأشيرات سفر' },
+    { keywords: ['عمرة', 'umrah'], category: 'travel_tourism', option: 'عمرة' },
+    { keywords: ['كروز', 'رحلة بحرية', 'رحلات بحرية', 'cruise'], category: 'travel_tourism', option: 'رحلات بحرية' },
+    { keywords: ['تأجير سيارات للسفر', 'تاجير سيارات للسفر', 'rent a car travel'], category: 'travel_tourism', option: 'تأجير سيارات للسفر' },
+
     { keywords: ['فندق', 'فنادق', 'hotel', 'hotels'], category: 'hotels_apartments', option: 'فنادق' },
     { keywords: ['شقق فندقية', 'hotel apartment', 'hotel apartments', 'aparthotel'], category: 'hotels_apartments', option: 'شقق فندقية' },
     { keywords: ['رخيص', 'cheap', 'budget'], category: 'hotels_apartments', option: 'رخيص' },
@@ -454,7 +471,7 @@ export default function HomeScreen() {
             </Text>
 
             <Text style={[styles.heroSubtitle, isMobile && styles.heroSubtitleMobile]}>
-              ابحث عن أفضل مطعم، كافيه، كراج، عيادة، صالون، خدمة منزلية أو فندق حسب المدينة والتقييم والمسافة.
+              ابحث عن أفضل مطعم، كافيه، كراج، عيادة، صالون، خدمة منزلية، وكالة سفر أو فندق حسب المدينة والتقييم والمسافة.
             </Text>
           </View>
         </ImageBackground>
