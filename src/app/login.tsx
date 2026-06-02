@@ -193,6 +193,28 @@ export default function LoginScreen() {
     setMessage('تم إرسال رابط إعادة تعيين كلمة السر إلى بريدك الإلكتروني.');
   }
 
+async function handleGoogleLogin() {
+  clearMessage();
+  setLoading(true);
+
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo:
+        typeof window !== 'undefined'
+          ? window.location.origin
+          : undefined,
+    },
+  });
+
+  setLoading(false);
+
+  if (error) {
+    setIsError(true);
+    setMessage('تعذر تسجيل الدخول بواسطة Google.');
+  }
+}
+
   const title =
     mode === 'login'
       ? 'تسجيل الدخول'
@@ -290,7 +312,30 @@ export default function LoginScreen() {
                   {loading ? 'جاري الدخول...' : 'تسجيل الدخول'}
                 </Text>
               </TouchableOpacity>
-
+<TouchableOpacity
+  style={[
+    styles.primaryButton,
+    {
+      backgroundColor: '#ffffff',
+      borderWidth: 1,
+      borderColor: '#dadce0',
+      marginTop: 12,
+    },
+  ]}
+  onPress={handleGoogleLogin}
+  disabled={loading}
+>
+  <Text
+    style={[
+      styles.primaryButtonText,
+      {
+        color: '#202124',
+      },
+    ]}
+  >
+    متابعة بواسطة Google
+  </Text>
+</TouchableOpacity>
               <TouchableOpacity
                 style={styles.forgotButton}
                 onPress={() => {
@@ -368,6 +413,17 @@ export default function LoginScreen() {
             رابط إعادة تعيين كلمة السر سيصلك عبر البريد الإلكتروني المسجل في Supabase.
           </Text>
         </View>
+        <View style={styles.legalLinksBox}>
+  <TouchableOpacity onPress={() => router.push('/privacy' as any)}>
+    <Text style={styles.legalLink}>سياسة الخصوصية</Text>
+  </TouchableOpacity>
+
+  <Text style={styles.legalSeparator}>|</Text>
+
+  <TouchableOpacity onPress={() => router.push('/terms' as any)}>
+    <Text style={styles.legalLink}>شروط الاستخدام</Text>
+  </TouchableOpacity>
+</View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -581,4 +637,23 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     textAlign: 'right',
   },
+  legalLinksBox: {
+  flexDirection: 'row-reverse',
+  justifyContent: 'center',
+  alignItems: 'center',
+  marginTop: 18,
+  marginBottom: 12,
+},
+
+legalLink: {
+  color: colors.navy,
+  fontSize: 14,
+  fontWeight: '900',
+},
+
+legalSeparator: {
+  color: colors.muted,
+  fontSize: 14,
+  fontWeight: '700',
+},
 });
