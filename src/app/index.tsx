@@ -1,8 +1,9 @@
 import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Image,
   ImageBackground,
+  Modal,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -338,6 +339,10 @@ export default function HomeScreen() {
   const [loadingUser, setLoadingUser] = useState(true);
   const [selectedCityKey, setSelectedCityKey] = useState<CityKey>('sharjah');
   const [searchText, setSearchText] = useState('');
+  const scrollRef = useRef<ScrollView | null>(null);
+  const [searchModalVisible, setSearchModalVisible] = useState(false);
+  const [cityModalVisible, setCityModalVisible] = useState(false);
+  const [quickSearchText, setQuickSearchText] = useState('');
 
   const selectedCity = getCityByKey(selectedCityKey);
 
@@ -425,6 +430,35 @@ export default function HomeScreen() {
     });
   }
 
+  function openQuickSearch() {
+    setQuickSearchText(searchText);
+    setSearchModalVisible(true);
+  }
+
+  function runQuickSearch() {
+    const text = quickSearchText.trim();
+
+    setSearchText(text);
+    setSearchModalVisible(false);
+
+    if (!text) {
+      scrollRef.current?.scrollTo({ y: 0, animated: true });
+      return;
+    }
+
+    const intent = detectSearchIntent(text);
+
+    router.push({
+      pathname: '/results',
+      params: {
+        category: intent.category,
+        option: intent.option,
+        query: text,
+        city: selectedCityKey,
+      },
+    });
+  }
+
   function runQuickFilter(filter: string) {
     router.push({
       pathname: '/results',
@@ -438,17 +472,28 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={[styles.container, isMobile && styles.containerMobile]}>
-        <View style={styles.topBar}>
-          <TouchableOpacity style={styles.favoriteTopButton} onPress={goToFavorites}>
-            <Text style={styles.favoriteTopButtonText}>❤️</Text>
-          </TouchableOpacity>
+      <View style={styles.stickyHeader}>
+        <TouchableOpacity style={styles.stickyChip} onPress={() => setCityModalVisible(true)}>
+          <Text style={styles.stickyChipText}>📍 {selectedCity.nameAr}</Text>
+        </TouchableOpacity>
 
-          <View style={styles.cityPill}>
-            <Text style={styles.cityPillText}>📍 {selectedCity.nameAr}</Text>
-          </View>
-        </View>
+        <TouchableOpacity style={styles.stickySearchButton} onPress={openQuickSearch}>
+          <Text style={styles.stickySearchButtonText}>🔍 بحث</Text>
+        </TouchableOpacity>
 
+        <TouchableOpacity style={styles.stickyIconButton} onPress={goToFavorites}>
+          <Text style={styles.stickyIconText}>❤️</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.stickyIconButton} onPress={user ? signOut : goToLogin}>
+          <Text style={styles.stickyIconText}>{user ? '👤' : '🔐'}</Text>
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView
+        ref={scrollRef}
+        contentContainerStyle={[styles.container, isMobile && styles.containerMobile]}
+      >
         <ImageBackground
           source={cityWatermarkImage}
           style={[styles.heroCard, isMobile && styles.heroCardMobile]}
@@ -533,27 +578,11 @@ export default function HomeScreen() {
           </ScrollView>
         </View>
 
-        {loadingUser ? (
-          <View style={styles.accountBox}>
-            <Text style={styles.accountText}>جاري التحقق من الحساب...</Text>
-          </View>
-        ) : user ? (
-          <View style={[styles.accountBox, isMobile && styles.accountBoxMobile]}>
-            <View style={styles.accountTextBox}>
-              <Text style={styles.accountTitle}>مرحبًا بك</Text>
-              <Text style={styles.accountText}>{user.email}</Text>
-            </View>
-
-            <TouchableOpacity style={styles.logoutButton} onPress={signOut}>
-              <Text style={styles.logoutButtonText}>خروج</Text>
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <TouchableOpacity style={styles.loginCard} onPress={goToLogin}>
-            <Text style={styles.loginCardTitle}>سجّل دخولك</Text>
-            <Text style={styles.loginCardText}>لحفظ الأماكن المفضلة والرجوع لها لاحقًا</Text>
-          </TouchableOpacity>
-        )}
+        <View style={styles.accountMiniBox}>
+          <Text style={styles.accountMiniText}>
+            {loadingUser ? 'جاري التحقق...' : user ? `👤 ${user.email ?? 'حسابي'}` : '🔐 سجل دخولك لحفظ المفضلة'}
+          </Text>
+        </View>
 
         <View style={styles.sectionHeader}>
           <Text style={[styles.sectionTitle, isMobile && styles.sectionTitleMobile]}>
@@ -630,6 +659,78 @@ export default function HomeScreen() {
 </TouchableOpacity>
 
       </ScrollView>
+
+      <Modal
+        visible={searchModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setSearchModalVisible(false)}
+      >
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalSheet}>
+            <Text style={styles.modalTitle}>🔍 بحث سريع</Text>
+            <Text style={styles.modalSubtitle}>اكتب ما تبحث عنه وسنفتح لك النتائج مباشرة</Text>
+
+            <TextInput
+              value={quickSearchText}
+              onChangeText={setQuickSearchText}
+              placeholder="مطعم، كراج، كوفي، مستشفى..."
+              placeholderTextColor="#94A3B8"
+              style={styles.modalInput}
+              onSubmitEditing={runQuickSearch}
+              returnKeyType="search"
+              textAlign="right"
+            />
+
+            <TouchableOpacity style={styles.modalPrimaryButton} onPress={runQuickSearch}>
+              <Text style={styles.modalPrimaryButtonText}>ابحث الآن</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.modalCancelButton} onPress={() => setSearchModalVisible(false)}>
+              <Text style={styles.modalCancelButtonText}>إلغاء</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={cityModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setCityModalVisible(false)}
+      >
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalSheet}>
+            <Text style={styles.modalTitle}>📍 اختر المدينة</Text>
+            <Text style={styles.modalSubtitle}>ستظهر النتائج حسب المدينة المختارة</Text>
+
+            <View style={styles.modalCityGrid}>
+              {cities.map((city) => {
+                const active = city.key === selectedCityKey;
+
+                return (
+                  <TouchableOpacity
+                    key={city.key}
+                    style={[styles.modalCityChip, active && styles.modalCityChipActive]}
+                    onPress={() => {
+                      setSelectedCityKey(city.key);
+                      setCityModalVisible(false);
+                    }}
+                  >
+                    <Text style={[styles.modalCityChipText, active && styles.modalCityChipTextActive]}>
+                      {city.nameAr}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+
+            <TouchableOpacity style={styles.modalCancelButton} onPress={() => setCityModalVisible(false)}>
+              <Text style={styles.modalCancelButtonText}>إغلاق</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -638,6 +739,65 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: colors.bg,
+  },
+  stickyHeader: {
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 22,
+    padding: 10,
+    marginHorizontal: 14,
+    marginTop: 8,
+    marginBottom: 8,
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
+    zIndex: 10,
+  },
+  stickyChip: {
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 999,
+    paddingVertical: 9,
+    paddingHorizontal: 12,
+  },
+  stickyChipText: {
+    color: colors.navy,
+    fontWeight: '900',
+    fontSize: 13,
+  },
+  stickySearchButton: {
+    flex: 1,
+    backgroundColor: colors.navy,
+    borderRadius: 999,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+  },
+  stickySearchButtonText: {
+    color: colors.white,
+    fontWeight: '900',
+    fontSize: 14,
+  },
+  stickyIconButton: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: colors.border,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  stickyIconText: {
+    fontSize: 18,
   },
   container: {
     padding: 18,
@@ -1047,6 +1207,104 @@ const styles = StyleSheet.create({
     color: '#D9F7F4',
     lineHeight: 22,
     textAlign: 'right',
+  },
+  accountMiniBox: {
+    backgroundColor: colors.white,
+    borderRadius: 18,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderWidth: 1,
+    borderColor: colors.border,
+    marginBottom: 16,
+  },
+  accountMiniText: {
+    color: colors.muted,
+    fontSize: 13,
+    fontWeight: '800',
+    textAlign: 'right',
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.42)',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  modalSheet: {
+    backgroundColor: colors.white,
+    borderRadius: 24,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  modalTitle: {
+    color: colors.navy,
+    fontSize: 22,
+    fontWeight: '900',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  modalSubtitle: {
+    color: colors.muted,
+    fontSize: 14,
+    fontWeight: '700',
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 14,
+  },
+  modalInput: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 12,
+    color: colors.text,
+    fontSize: 15,
+  },
+  modalPrimaryButton: {
+    backgroundColor: colors.navy,
+    padding: 14,
+    borderRadius: 16,
+    marginBottom: 10,
+  },
+  modalPrimaryButtonText: {
+    color: colors.white,
+    textAlign: 'center',
+    fontWeight: '900',
+    fontSize: 15,
+  },
+  modalCancelButton: {
+    paddingVertical: 10,
+  },
+  modalCancelButtonText: {
+    textAlign: 'center',
+    color: colors.muted,
+    fontWeight: '900',
+  },
+  modalCityGrid: {
+    flexDirection: 'row-reverse',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginBottom: 10,
+    justifyContent: 'center',
+  },
+  modalCityChip: {
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 999,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+  },
+  modalCityChipActive: {
+    backgroundColor: colors.teal,
+    borderColor: colors.teal,
+  },
+  modalCityChipText: {
+    color: colors.navy,
+    fontWeight: '900',
+  },
+  modalCityChipTextActive: {
+    color: colors.white,
   },
   contactButton: {
   backgroundColor: '#06214A',
