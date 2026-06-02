@@ -1,4 +1,5 @@
 import { router } from 'expo-router';
+import * as WebBrowser from 'expo-web-browser';
 import { useState } from 'react';
 import {
   Image,
@@ -197,21 +198,39 @@ async function handleGoogleLogin() {
   clearMessage();
   setLoading(true);
 
-  const { error } = await supabase.auth.signInWithOAuth({
+  const redirectTo = 'wenbest://auth/callback';
+
+  const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo:
-        typeof window !== 'undefined'
-          ? window.location.origin
-          : undefined,
+      redirectTo,
+      skipBrowserRedirect: true,
     },
   });
 
-  setLoading(false);
-
   if (error) {
+    setLoading(false);
     setIsError(true);
     setMessage('تعذر تسجيل الدخول بواسطة Google.');
+    return;
+  }
+
+  if (data?.url) {
+    const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
+
+    setLoading(false);
+
+    if (result.type === 'success') {
+      setMessage('تم تسجيل الدخول بواسطة Google بنجاح.');
+      router.replace('/');
+    } else {
+      setIsError(true);
+      setMessage('تم إلغاء تسجيل الدخول بواسطة Google.');
+    }
+  } else {
+    setLoading(false);
+    setIsError(true);
+    setMessage('تعذر فتح صفحة Google.');
   }
 }
 

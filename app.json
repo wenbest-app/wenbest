@@ -25,15 +25,16 @@
     "plugins": [
       "expo-router",
       [
-  "expo-splash-screen",
-  {
-    "backgroundColor": "#FFFFFF",
-    "android": {
-      "image": "./assets/images/splash-icon.png",
-      "imageWidth": 120
-    }
-  }
-]
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#FFFFFF",
+          "android": {
+            "image": "./assets/images/splash-icon.png",
+            "imageWidth": 120
+          }
+        }
+      ],
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
