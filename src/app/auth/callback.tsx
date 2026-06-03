@@ -13,27 +13,48 @@ export default function AuthCallbackScreen() {
       const codeParam = params.code;
       const code = Array.isArray(codeParam) ? codeParam[0] : codeParam;
 
-      if (!code) {
-        setMessage('تعذر استلام رمز تسجيل الدخول.');
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+
+        if (error) {
+          setMessage('تعذر إكمال تسجيل الدخول بواسطة Google.');
+          return;
+        }
+
+        router.replace('/');
         return;
       }
 
-      const { error } = await supabase.auth.exchangeCodeForSession(code);
+      const accessToken = params.access_token;
+      const refreshToken = params.refresh_token;
 
-      if (error) {
-        setMessage('تعذر إكمال تسجيل الدخول بواسطة Google.');
+      const access = Array.isArray(accessToken) ? accessToken[0] : accessToken;
+      const refresh = Array.isArray(refreshToken) ? refreshToken[0] : refreshToken;
+
+      if (access && refresh) {
+        const { error } = await supabase.auth.setSession({
+          access_token: access,
+          refresh_token: refresh,
+        });
+
+        if (error) {
+          setMessage('تعذر تثبيت جلسة تسجيل الدخول.');
+          return;
+        }
+
+        router.replace('/');
         return;
       }
 
-      router.replace('/');
+      setMessage('تعذر استلام رمز تسجيل الدخول.');
     }
 
     completeLogin();
-  }, [params.code]);
+  }, [params.code, params.access_token, params.refresh_token]);
 
   return (
     <SafeAreaView style={styles.container}>
-      <ActivityIndicator size="large" />
+      <ActivityIndicator size="large" color="#09AFA3" />
       <Text style={styles.text}>{message}</Text>
     </SafeAreaView>
   );
