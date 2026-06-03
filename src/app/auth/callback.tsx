@@ -1,8 +1,17 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, SafeAreaView, StyleSheet, Text } from 'react-native';
+import { ActivityIndicator, Linking, SafeAreaView, StyleSheet, Text } from 'react-native';
 
 import { supabase } from '../../../lib/supabase';
+
+function getValueFromUrl(url: string, key: string) {
+  const queryPart = url.split('?')[1]?.split('#')[0] ?? '';
+  const hashPart = url.split('#')[1] ?? '';
+  const allParams = `${queryPart}&${hashPart}`;
+
+  const params = new URLSearchParams(allParams);
+  return params.get(key);
+}
 
 export default function AuthCallbackScreen() {
   const params = useLocalSearchParams();
@@ -10,8 +19,11 @@ export default function AuthCallbackScreen() {
 
   useEffect(() => {
     async function completeLogin() {
-      const codeParam = params.code;
-      const code = Array.isArray(codeParam) ? codeParam[0] : codeParam;
+      const initialUrl = await Linking.getInitialURL();
+
+      const codeFromParams = Array.isArray(params.code) ? params.code[0] : params.code;
+      const codeFromUrl = initialUrl ? getValueFromUrl(initialUrl, 'code') : null;
+      const code = codeFromParams || codeFromUrl;
 
       if (code) {
         const { error } = await supabase.auth.exchangeCodeForSession(code);
@@ -25,16 +37,18 @@ export default function AuthCallbackScreen() {
         return;
       }
 
-      const accessToken = params.access_token;
-      const refreshToken = params.refresh_token;
+      const accessToken =
+        (Array.isArray(params.access_token) ? params.access_token[0] : params.access_token) ||
+        (initialUrl ? getValueFromUrl(initialUrl, 'access_token') : null);
 
-      const access = Array.isArray(accessToken) ? accessToken[0] : accessToken;
-      const refresh = Array.isArray(refreshToken) ? refreshToken[0] : refreshToken;
+      const refreshToken =
+        (Array.isArray(params.refresh_token) ? params.refresh_token[0] : params.refresh_token) ||
+        (initialUrl ? getValueFromUrl(initialUrl, 'refresh_token') : null);
 
-      if (access && refresh) {
+      if (accessToken && refreshToken) {
         const { error } = await supabase.auth.setSession({
-          access_token: access,
-          refresh_token: refresh,
+          access_token: accessToken,
+          refresh_token: refreshToken,
         });
 
         if (error) {
@@ -50,7 +64,7 @@ export default function AuthCallbackScreen() {
     }
 
     completeLogin();
-  }, [params.code, params.access_token, params.refresh_token]);
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
