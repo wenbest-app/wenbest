@@ -578,11 +578,23 @@ export default function HomeScreen() {
           </ScrollView>
         </View>
 
-        <View style={styles.accountMiniBox}>
-          <Text style={styles.accountMiniText}>
-            {loadingUser ? 'جاري التحقق...' : user ? `👤 ${user.email ?? 'حسابي'}` : '🔐 سجل دخولك لحفظ المفضلة'}
-          </Text>
-        </View>
+        <TouchableOpacity
+  style={styles.accountMiniBox}
+  onPress={() => {
+    if (!user) {
+      goToLogin();
+    }
+  }}
+  activeOpacity={user ? 1 : 0.8}
+>
+  <Text style={styles.accountMiniText}>
+    {loadingUser
+      ? 'جاري التحقق...'
+      : user
+        ? `👤 ${user.email ?? 'حسابي'}`
+        : '🔐 سجل دخولك لحفظ المفضلة'}
+  </Text>
+</TouchableOpacity>
 
         <View style={styles.sectionHeader}>
           <Text style={[styles.sectionTitle, isMobile && styles.sectionTitleMobile]}>

@@ -208,30 +208,44 @@ async function handleGoogleLogin() {
     },
   });
 
-  if (error) {
+  if (error || !data?.url) {
     setLoading(false);
     setIsError(true);
     setMessage('تعذر تسجيل الدخول بواسطة Google.');
     return;
   }
 
-  if (data?.url) {
-    const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
+  const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
 
-    setLoading(false);
-
-    if (result.type === 'success') {
-      setMessage('تم تسجيل الدخول بواسطة Google بنجاح.');
-      router.replace('/');
-    } else {
-      setIsError(true);
-      setMessage('تم إلغاء تسجيل الدخول بواسطة Google.');
-    }
-  } else {
+  if (result.type !== 'success') {
     setLoading(false);
     setIsError(true);
-    setMessage('تعذر فتح صفحة Google.');
+    setMessage('تم إلغاء تسجيل الدخول بواسطة Google.');
+    return;
   }
+
+  const url = result.url;
+  const codeMatch = url.match(/[?&]code=([^&]+)/);
+  const code = codeMatch?.[1];
+
+  if (!code) {
+    setLoading(false);
+    setIsError(true);
+    setMessage('لم يتم استلام رمز الدخول من Google.');
+    return;
+  }
+
+  const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+
+  setLoading(false);
+
+  if (exchangeError) {
+    setIsError(true);
+    setMessage('تعذر إكمال تسجيل الدخول بواسطة Google.');
+    return;
+  }
+
+  router.replace('/');
 }
 
   const title =
