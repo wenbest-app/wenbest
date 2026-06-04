@@ -225,7 +225,7 @@ async function handleGoogleLogin() {
   }
 
   const url = result.url;
-  const codeMatch = url.match(/[?&]code=([^&]+)/);
+  const codeMatch = url.match(/[?&#]code=([^&]+)/);
   const code = codeMatch?.[1];
 
   if (!code) {
