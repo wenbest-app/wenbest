@@ -1,5 +1,4 @@
 import { router } from 'expo-router';
-import * as WebBrowser from 'expo-web-browser';
 import { useState } from 'react';
 import {
   Image,
@@ -12,7 +11,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-WebBrowser.maybeCompleteAuthSession();
 
 import { supabase } from '../../lib/supabase';
 
@@ -195,60 +193,6 @@ export default function LoginScreen() {
     setMessage('تم إرسال رابط إعادة تعيين كلمة السر إلى بريدك الإلكتروني.');
   }
 
-async function handleGoogleLogin() {
-  clearMessage();
-  setLoading(true);
-
-  const redirectTo = 'wenbest://';
-
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: 'google',
-    options: {
-      redirectTo,
-      skipBrowserRedirect: true,
-    },
-  });
-
-  if (error || !data?.url) {
-    setLoading(false);
-    setIsError(true);
-    setMessage('تعذر تسجيل الدخول بواسطة Google.');
-    return;
-  }
-
-  const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
-
-  if (result.type !== 'success') {
-    setLoading(false);
-    setIsError(true);
-    setMessage('تم إلغاء تسجيل الدخول بواسطة Google.');
-    return;
-  }
-
-  const url = result.url;
-  const codeMatch = url.match(/[?&#]code=([^&]+)/);
-  const code = codeMatch?.[1];
-
-  if (!code) {
-    setLoading(false);
-    setIsError(true);
-    setMessage('لم يتم استلام رمز الدخول من Google.');
-    return;
-  }
-
-  const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
-
-  setLoading(false);
-
-  if (exchangeError) {
-    setIsError(true);
-    setMessage('تعذر إكمال تسجيل الدخول بواسطة Google.');
-    return;
-  }
-
-  router.replace('/');
-}
-
   const title =
     mode === 'login'
       ? 'تسجيل الدخول'
@@ -336,61 +280,28 @@ async function handleGoogleLogin() {
           ) : null}
 
           {mode === 'login' ? (
-            <>
-              <TouchableOpacity
-                style={styles.primaryButton}
-                onPress={handleLogin}
-                disabled={loading}
-              >
-                <Text style={styles.primaryButtonText}>
-                  {loading ? 'جاري الدخول...' : 'تسجيل الدخول'}
-                </Text>
-              </TouchableOpacity>
-<TouchableOpacity
-  style={[
-    styles.primaryButton,
-    {
-      backgroundColor: '#ffffff',
-      borderWidth: 1,
-      borderColor: '#dadce0',
-      marginTop: 12,
-    },
-  ]}
-  onPress={handleGoogleLogin}
-  disabled={loading}
->
-  <Text
-    style={[
-      styles.primaryButtonText,
-      {
-        color: '#202124',
-      },
-    ]}
-  >
-    متابعة بواسطة Google
-  </Text>
-</TouchableOpacity>
-              <TouchableOpacity
-                style={styles.forgotButton}
-                onPress={() => {
-                  clearMessage();
-                  setMode('forgot');
-                }}
-              >
-                <Text style={styles.forgotButtonText}>نسيت كلمة السر؟</Text>
-              </TouchableOpacity>
+  <>
+    <TouchableOpacity
+      style={styles.forgotButton}
+      onPress={() => {
+        clearMessage();
+        setMode('forgot');
+      }}
+    >
+      <Text style={styles.forgotButtonText}>نسيت كلمة السر؟</Text>
+    </TouchableOpacity>
 
-              <TouchableOpacity
-                style={styles.secondaryButton}
-                onPress={() => {
-                  clearMessage();
-                  setMode('signup');
-                }}
-              >
-                <Text style={styles.secondaryButtonText}>إنشاء حساب جديد</Text>
-              </TouchableOpacity>
-            </>
-          ) : null}
+    <TouchableOpacity
+      style={styles.secondaryButton}
+      onPress={() => {
+        clearMessage();
+        setMode('signup');
+      }}
+    >
+      <Text style={styles.secondaryButtonText}>إنشاء حساب جديد</Text>
+    </TouchableOpacity>
+  </>
+) : null}
 
           {mode === 'signup' ? (
             <>
