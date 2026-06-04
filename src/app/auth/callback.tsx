@@ -1,90 +1,59 @@
 import * as Linking from 'expo-linking';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, SafeAreaView, StyleSheet, Text } from 'react-native';
-
-import { supabase } from '../../../lib/supabase';
-
-function getParamFromUrl(url: string, key: string) {
-  const cleanUrl = url.replace('#', '?');
-  const query = cleanUrl.split('?')[1] ?? '';
-  const params = new URLSearchParams(query);
-  return params.get(key);
-}
+import { SafeAreaView, ScrollView, StyleSheet, Text } from 'react-native';
 
 export default function AuthCallbackScreen() {
   const params = useLocalSearchParams();
   const url = Linking.useURL();
-  const [message, setMessage] = useState('جاري إكمال تسجيل الدخول...');
+  const [initialUrl, setInitialUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    async function completeLogin() {
-      const codeFromParams = Array.isArray(params.code) ? params.code[0] : params.code;
-      const codeFromUrl = url ? getParamFromUrl(url, 'code') : null;
-      const code = codeFromParams || codeFromUrl;
-
-      if (code) {
-        const { error } = await supabase.auth.exchangeCodeForSession(code);
-
-        if (error) {
-          setMessage('تعذر إكمال تسجيل الدخول بواسطة Google.');
-          return;
-        }
-
-        router.replace('/');
-        return;
-      }
-
-      const accessToken =
-        (Array.isArray(params.access_token) ? params.access_token[0] : params.access_token) ||
-        (url ? getParamFromUrl(url, 'access_token') : null);
-
-      const refreshToken =
-        (Array.isArray(params.refresh_token) ? params.refresh_token[0] : params.refresh_token) ||
-        (url ? getParamFromUrl(url, 'refresh_token') : null);
-
-      if (accessToken && refreshToken) {
-        const { error } = await supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken,
-        });
-
-        if (error) {
-          setMessage('تعذر تثبيت جلسة تسجيل الدخول.');
-          return;
-        }
-
-        router.replace('/');
-        return;
-      }
-
-      setMessage('تعذر استلام رمز تسجيل الدخول.');
-    }
-
-    completeLogin();
-  }, [url, params.code, params.access_token, params.refresh_token]);
+    Linking.getInitialURL().then(setInitialUrl);
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
-      <ActivityIndicator size="large" color="#09AFA3" />
-      <Text style={styles.text}>{message}</Text>
+      <ScrollView contentContainerStyle={styles.content}>
+        <Text style={styles.title}>Google Callback Debug</Text>
+
+        <Text style={styles.label}>useURL:</Text>
+        <Text style={styles.value}>{url || 'NO URL'}</Text>
+
+        <Text style={styles.label}>initialURL:</Text>
+        <Text style={styles.value}>{initialUrl || 'NO INITIAL URL'}</Text>
+
+        <Text style={styles.label}>params:</Text>
+        <Text style={styles.value}>{JSON.stringify(params, null, 2)}</Text>
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F5F8FC',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  text: {
-    marginTop: 16,
+  container: { flex: 1, backgroundColor: '#F5F8FC' },
+  content: { padding: 20, paddingTop: 80 },
+  title: {
+    fontSize: 22,
+    fontWeight: '900',
     color: '#06214A',
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  label: {
     fontSize: 16,
     fontWeight: '900',
-    textAlign: 'center',
+    color: '#09AFA3',
+    marginTop: 18,
+  },
+  value: {
+    fontSize: 13,
+    color: '#06214A',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    borderRadius: 12,
+    padding: 12,
+    marginTop: 8,
   },
 });
