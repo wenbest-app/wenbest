@@ -198,7 +198,7 @@ async function handleGoogleLogin() {
   clearMessage();
   setLoading(true);
 
-  const redirectTo = 'wenbest://auth/callback';
+  const redirectTo = 'wenbest://';
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
@@ -246,7 +246,7 @@ async function handleGoogleLogin() {
   }
 
   router.replace('/');
-}
+}yield
 
   const title =
     mode === 'login'
