@@ -246,7 +246,7 @@ async function handleGoogleLogin() {
   }
 
   router.replace('/');
-}yield
+}
 
   const title =
     mode === 'login'
