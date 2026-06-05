@@ -281,6 +281,15 @@ export default function LoginScreen() {
 
           {mode === 'login' ? (
   <>
+  <TouchableOpacity
+  style={styles.primaryButton}
+  onPress={handleLogin}
+  disabled={loading}
+>
+  <Text style={styles.primaryButtonText}>
+    {loading ? 'جاري الدخول...' : 'تسجيل الدخول'}
+  </Text>
+</TouchableOpacity>
     <TouchableOpacity
       style={styles.forgotButton}
       onPress={() => {
@@ -355,7 +364,7 @@ export default function LoginScreen() {
         <View style={styles.infoBox}>
           <Text style={styles.infoTitle}>ملاحظة</Text>
           <Text style={styles.infoText}>
-            رابط إعادة تعيين كلمة السر سيصلك عبر البريد الإلكتروني المسجل في Supabase.
+            إذا نسيت كلمة السر، يمكنك طلب رابط إعادة التعيين عبر بريدك الإلكتروني.
           </Text>
         </View>
         <View style={styles.legalLinksBox}>
