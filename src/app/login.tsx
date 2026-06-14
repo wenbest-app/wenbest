@@ -3,6 +3,7 @@ import { useState } from 'react';
 import {
   Image,
   ImageBackground,
+  Linking,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -367,6 +368,34 @@ export default function LoginScreen() {
             إذا نسيت كلمة السر، يمكنك طلب رابط إعادة التعيين عبر بريدك الإلكتروني.
           </Text>
         </View>
+        <View style={styles.downloadSection}>
+  <Text style={styles.downloadTitle}>حمّل تطبيق WenBest</Text>
+
+  <Text style={styles.downloadText}>
+    استخدم WenBest على هاتفك للوصول السريع إلى أفضل الأماكن وحفظ المفضلة بسهولة.
+  </Text>
+
+  <View style={styles.downloadButtons}>
+    <TouchableOpacity
+      style={styles.androidButton}
+      onPress={() =>
+        Linking.openURL(
+          'https://drive.google.com/file/d/1ox9G2HfcxBMH-hI1y2uPaahltRJPUqRT/view?usp=drive_link'
+        )
+      }
+    >
+      <Text style={styles.androidButtonText}>⬇️ تحميل Android</Text>
+    </TouchableOpacity>
+
+    <View style={styles.disabledStoreButton}>
+      <Text style={styles.disabledStoreButtonText}> iPhone قريبًا</Text>
+    </View>
+
+    <View style={styles.disabledStoreButton}>
+      <Text style={styles.disabledStoreButtonText}>▶ Google Play قريبًا</Text>
+    </View>
+  </View>
+</View>
         <View style={styles.legalLinksBox}>
   <TouchableOpacity onPress={() => router.push('/privacy' as any)}>
     <Text style={styles.legalLink}>سياسة الخصوصية</Text>
@@ -609,5 +638,68 @@ legalSeparator: {
   color: colors.muted,
   fontSize: 14,
   fontWeight: '700',
+},
+downloadSection: {
+  backgroundColor: '#FFFFFF',
+  borderRadius: 30,
+  padding: 24,
+  borderWidth: 1,
+  borderColor: '#E2E8F0',
+  alignItems: 'center',
+  marginTop: 18,
+  marginBottom: 18,
+},
+
+downloadTitle: {
+  color: '#06214A',
+  fontSize: 26,
+  fontWeight: '900',
+  textAlign: 'center',
+  marginBottom: 10,
+},
+
+downloadText: {
+  color: '#64748B',
+  fontSize: 15,
+  lineHeight: 25,
+  fontWeight: '700',
+  textAlign: 'center',
+  maxWidth: 680,
+  marginBottom: 18,
+},
+
+downloadButtons: {
+  flexDirection: 'row-reverse',
+  flexWrap: 'wrap',
+  gap: 12,
+  justifyContent: 'center',
+},
+
+androidButton: {
+  backgroundColor: '#F5B942',
+  borderRadius: 999,
+  paddingVertical: 14,
+  paddingHorizontal: 22,
+},
+
+androidButtonText: {
+  color: '#06214A',
+  fontSize: 16,
+  fontWeight: '900',
+},
+
+disabledStoreButton: {
+  backgroundColor: '#F1F5F9',
+  borderRadius: 999,
+  paddingVertical: 14,
+  paddingHorizontal: 22,
+  borderWidth: 1,
+  borderColor: '#E2E8F0',
+},
+
+disabledStoreButtonText: {
+  color: '#64748B',
+  fontSize: 16,
+  fontWeight: '900',
 },
 });

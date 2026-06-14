@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import {
   Image,
   ImageBackground,
+  Linking,
   Modal,
   SafeAreaView,
   ScrollView,
@@ -13,6 +14,7 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
+import BottomNav from '../components/BottomNav';
 
 import { cities, CityKey, getCityByKey } from '../../lib/cities';
 import { supabase } from '../../lib/supabase';
@@ -491,9 +493,13 @@ export default function HomeScreen() {
       </View>
 
       <ScrollView
-        ref={scrollRef}
-        contentContainerStyle={[styles.container, isMobile && styles.containerMobile]}
-      >
+  ref={scrollRef}
+  contentContainerStyle={[
+    styles.container,
+    isMobile && styles.containerMobile,
+    { paddingBottom: 120 }
+  ]}
+>
         <ImageBackground
           source={cityWatermarkImage}
           style={[styles.heroCard, isMobile && styles.heroCardMobile]}
@@ -520,6 +526,30 @@ export default function HomeScreen() {
             </Text>
           </View>
         </ImageBackground>
+
+<TouchableOpacity style={styles.adPremiumSlot}>
+  <View style={styles.adBackgroundCircleOne} />
+  <View style={styles.adBackgroundCircleTwo} />
+
+  <View style={styles.adPremiumTopRow}>
+    <Text style={styles.adPremiumBadge}>⭐ مساحة إعلانية</Text>
+    <Text style={styles.adPremiumTag}>متاحة للمعلنين</Text>
+  </View>
+
+  <Text style={styles.adPremiumTitle}>روّج لنشاطك في WenBest</Text>
+
+  <Text style={styles.adPremiumSubtitle}>
+    مساحة مميزة لعرض المطاعم والفنادق والكافيهات والخدمات حسب المدينة.
+  </Text>
+
+  <View style={styles.adPremiumFooter}>
+    <Text style={styles.adPremiumNote}>إعلان مدفوع</Text>
+
+    <View style={styles.adPremiumButton}>
+      <Text style={styles.adPremiumButtonText}>احجز المساحة</Text>
+    </View>
+  </View>
+</TouchableOpacity>
 
         <View style={[styles.searchPanel, isMobile && styles.searchPanelMobile]}>
           <Text style={styles.searchLabel}>اكتب ما تبحث عنه</Text>
@@ -552,7 +582,7 @@ export default function HomeScreen() {
 
         <View style={styles.cityBox}>
           <Text style={styles.cityTitle}>
-  اختر المدينة التي ترغب في الحصول على افضل مكان فيها ↔
+  اختر المدينة↔
 </Text>
 
           <ScrollView
@@ -669,7 +699,34 @@ export default function HomeScreen() {
     💬 لديك اقتراح أو ملاحظة؟ نرحب بمشاركتك لتطوير WenBest
   </Text>
 </TouchableOpacity>
+<View style={styles.downloadSection}>
+  <Text style={styles.downloadTitle}>حمّل تطبيق WenBest</Text>
 
+  <Text style={styles.downloadText}>
+    استخدم WenBest على هاتفك للوصول السريع إلى أفضل الأماكن وحفظ المفضلة بسهولة.
+  </Text>
+
+  <View style={styles.downloadButtons}>
+    <TouchableOpacity
+      style={styles.androidButton}
+      onPress={() =>
+        Linking.openURL(
+          'https://drive.google.com/file/d/1ox9G2HfcxBMH-hI1y2uPaahltRJPUqRT/view?usp=drive_link'
+        )
+      }
+    >
+      <Text style={styles.androidButtonText}>⬇️ تحميل Android</Text>
+    </TouchableOpacity>
+
+    <View style={styles.disabledStoreButton}>
+      <Text style={styles.disabledStoreButtonText}> iPhone قريبًا</Text>
+    </View>
+
+    <View style={styles.disabledStoreButton}>
+      <Text style={styles.disabledStoreButtonText}>▶ Google Play قريبًا</Text>
+    </View>
+  </View>
+</View>
       </ScrollView>
 
       <Modal
@@ -743,6 +800,7 @@ export default function HomeScreen() {
           </View>
         </View>
       </Modal>
+      <BottomNav />
     </SafeAreaView>
   );
 }
@@ -1330,6 +1388,233 @@ const styles = StyleSheet.create({
 contactButtonText: {
   color: '#FFFFFF',
   fontSize: 16,
+  fontWeight: '900',
+},
+downloadSection: {
+  backgroundColor: colors.white,
+  borderRadius: 30,
+  padding: 24,
+  borderWidth: 1,
+  borderColor: colors.border,
+  alignItems: 'center',
+  marginTop: 18,
+  marginBottom: 18,
+},
+
+downloadTitle: {
+  color: colors.navy,
+  fontSize: 26,
+  fontWeight: '900',
+  textAlign: 'center',
+  marginBottom: 10,
+},
+
+downloadText: {
+  color: colors.muted,
+  fontSize: 15,
+  lineHeight: 25,
+  fontWeight: '700',
+  textAlign: 'center',
+  maxWidth: 680,
+  marginBottom: 18,
+},
+
+downloadButtons: {
+  flexDirection: 'row-reverse',
+  flexWrap: 'wrap',
+  gap: 12,
+  justifyContent: 'center',
+},
+
+androidButton: {
+  backgroundColor: colors.gold,
+  borderRadius: 999,
+  paddingVertical: 14,
+  paddingHorizontal: 22,
+},
+
+androidButtonText: {
+  color: colors.navy,
+  fontSize: 16,
+  fontWeight: '900',
+},
+
+disabledStoreButton: {
+  backgroundColor: '#F1F5F9',
+  borderRadius: 999,
+  paddingVertical: 14,
+  paddingHorizontal: 22,
+  borderWidth: 1,
+  borderColor: colors.border,
+},
+
+disabledStoreButtonText: {
+  color: colors.muted,
+  fontSize: 16,
+  fontWeight: '900',
+},
+adPlaceholderCard: {
+  backgroundColor: '#FFFFFF',
+  borderRadius: 22,
+  padding: 16,
+  borderWidth: 1,
+  borderColor: '#E2E8F0',
+  marginBottom: 16,
+},
+
+adHeaderRow: {
+  flexDirection: 'row-reverse',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginBottom: 8,
+},
+
+adBadge: {
+  color: '#06214A',
+  fontSize: 14,
+  fontWeight: '900',
+  textAlign: 'right',
+},
+
+adTag: {
+  backgroundColor: '#FFF7E0',
+  color: '#9A6700',
+  fontSize: 12,
+  fontWeight: '900',
+  paddingVertical: 5,
+  paddingHorizontal: 10,
+  borderRadius: 999,
+},
+
+adTitle: {
+  color: '#06214A',
+  fontSize: 19,
+  fontWeight: '900',
+  textAlign: 'right',
+  marginBottom: 6,
+},
+
+adSubtitle: {
+  color: '#64748B',
+  fontSize: 13,
+  fontWeight: '700',
+  textAlign: 'right',
+  lineHeight: 21,
+},
+
+adButton: {
+  marginTop: 12,
+  backgroundColor: '#F5B942',
+  borderRadius: 14,
+  paddingVertical: 11,
+},
+
+adButtonText: {
+  color: '#06214A',
+  fontWeight: '900',
+  textAlign: 'center',
+},
+adPremiumSlot: {
+  position: 'relative',
+  overflow: 'hidden',
+  backgroundColor: '#FFFFFF',
+  borderRadius: 24,
+  padding: 16,
+  marginBottom: 18,
+  borderWidth: 1,
+  borderColor: '#E2E8F0',
+},
+
+adBackgroundCircleOne: {
+  position: 'absolute',
+  width: 170,
+  height: 170,
+  borderRadius: 85,
+  backgroundColor: '#E6FFFA',
+  opacity: 0.55,
+  top: -70,
+  left: -50,
+},
+
+adBackgroundCircleTwo: {
+  position: 'absolute',
+  width: 150,
+  height: 150,
+  borderRadius: 75,
+  backgroundColor: '#FFF7E0',
+  opacity: 0.7,
+  bottom: -80,
+  right: -40,
+},
+
+adPremiumTopRow: {
+  flexDirection: 'row-reverse',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginBottom: 10,
+  gap: 10,
+},
+
+adPremiumBadge: {
+  color: '#06214A',
+  fontSize: 14,
+  fontWeight: '900',
+  textAlign: 'right',
+},
+
+adPremiumTag: {
+  backgroundColor: '#FFF7E0',
+  color: '#9A6700',
+  fontSize: 11,
+  fontWeight: '900',
+  paddingVertical: 5,
+  paddingHorizontal: 10,
+  borderRadius: 999,
+},
+
+adPremiumTitle: {
+  color: '#06214A',
+  fontSize: 20,
+  fontWeight: '900',
+  textAlign: 'right',
+  marginBottom: 6,
+},
+
+adPremiumSubtitle: {
+  color: '#64748B',
+  fontSize: 13,
+  fontWeight: '700',
+  textAlign: 'right',
+  lineHeight: 22,
+  maxWidth: 720,
+  alignSelf: 'flex-end',
+},
+
+adPremiumFooter: {
+  flexDirection: 'row-reverse',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginTop: 14,
+  gap: 10,
+},
+
+adPremiumNote: {
+  color: '#94A3B8',
+  fontSize: 12,
+  fontWeight: '800',
+  textAlign: 'right',
+},
+
+adPremiumButton: {
+  backgroundColor: '#F5B942',
+  borderRadius: 999,
+  paddingVertical: 9,
+  paddingHorizontal: 16,
+},
+
+adPremiumButtonText: {
+  color: '#06214A',
+  fontSize: 13,
   fontWeight: '900',
 },
 });

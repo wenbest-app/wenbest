@@ -379,6 +379,18 @@ function normalizeGoogleResult(item: any, body: RequestBody): PlaceResult {
   const searchTerm = body.query?.trim() || body.option;
   const optionLevel = getOptionMatchLevel(item, searchTerm);
 
+  const openNow =
+    item.opening_hours?.open_now ??
+    item.current_opening_hours?.open_now ??
+    null;
+
+  const openStatus =
+    openNow === true
+      ? '🟢 مفتوح الآن'
+      : openNow === false
+        ? '🔴 مغلق الآن'
+        : '⚪ حالة الدوام غير متوفرة';
+
   return {
     id: String(item.place_id ?? `${item.name}_${lat}_${lng}`),
     name: String(item.name ?? 'مكان بدون اسم'),
@@ -395,6 +407,12 @@ function normalizeGoogleResult(item: any, body: RequestBody): PlaceResult {
     provider: 'google',
     raw: {
       ...item,
+      open_now: openNow,
+      open_status: openStatus,
+      opening_hours: {
+        ...(item.opening_hours ?? {}),
+        open_now: openNow,
+      },
       wenbest_source: 'supabase_google_places',
       wenbest_option: body.option,
       wenbest_query: body.query ?? '',

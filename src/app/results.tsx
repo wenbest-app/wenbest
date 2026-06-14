@@ -102,7 +102,14 @@ function formatDistance(distance: number | null) {
 function getOpenStatus(place: PlaceResult) {
   const raw = place.raw ?? {};
 
-  if (raw.open_status) return raw.open_status;
+  const rawStatus = String(raw.open_status ?? '')
+    .replace('🟢', '')
+    .replace('🔴', '')
+    .replace('⚪', '')
+    .trim();
+
+  if (rawStatus) return rawStatus;
+
   if (raw.opening_hours?.open_now === true) return 'مفتوح الآن';
   if (raw.opening_hours?.open_now === false) return 'مغلق الآن';
   if (raw.current_opening_hours?.open_now === true) return 'مفتوح الآن';
@@ -112,8 +119,14 @@ function getOpenStatus(place: PlaceResult) {
 }
 
 function getOpenStatusIcon(status: string) {
-  if (status === 'مفتوح الآن') return '🟢';
-  if (status === 'مغلق الآن') return '🔴';
+  const cleanStatus = String(status)
+    .replace('🟢', '')
+    .replace('🔴', '')
+    .replace('⚪', '')
+    .trim();
+
+  if (cleanStatus === 'مفتوح الآن') return '🟢';
+  if (cleanStatus === 'مغلق الآن') return '🔴';
   return '⚪';
 }
 
@@ -169,6 +182,7 @@ export default function ResultsScreen() {
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
   const [userDistances, setUserDistances] = useState<Record<string, number>>({});
   const [activeSort, setActiveSort] = useState<SortMode>('best');
+  const [openOnly, setOpenOnly] = useState(false);
   const [cityModalVisible, setCityModalVisible] = useState(false);
 
   const pageSubtitle = optionGroup
@@ -266,24 +280,32 @@ export default function ResultsScreen() {
   const sortedPlaces = useMemo(() => {
     const list = [...places];
 
+    let filteredList = [...list];
+
+    if (openOnly) {
+      filteredList = filteredList.filter(
+        (place) => getOpenStatus(place) === 'مفتوح الآن'
+      );
+    }
+
     if (activeSort === 'rating') {
-      return list.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+      return filteredList.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
     }
 
     if (activeSort === 'reviews') {
-      return list.sort((a, b) => (b.reviewCount ?? 0) - (a.reviewCount ?? 0));
+      return filteredList.sort((a, b) => (b.reviewCount ?? 0) - (a.reviewCount ?? 0));
     }
 
     if (activeSort === 'nearest') {
-      return list.sort((a, b) => {
+      return filteredList.sort((a, b) => {
         const ad = userDistances[a.id] ?? a.distance ?? Number.MAX_SAFE_INTEGER;
         const bd = userDistances[b.id] ?? b.distance ?? Number.MAX_SAFE_INTEGER;
         return ad - bd;
       });
     }
 
-    return list.sort((a, b) => calculateWenBestScore(b) - calculateWenBestScore(a));
-  }, [places, activeSort, userDistances]);
+    return filteredList.sort((a, b) => calculateWenBestScore(b) - calculateWenBestScore(a));
+  }, [places, activeSort, userDistances, openOnly]);
 
   const bestPlace = sortedPlaces[0] ?? null;
 
@@ -309,6 +331,7 @@ export default function ResultsScreen() {
     setUserDistances({});
     setUserLocation(null);
     setActiveSort('best');
+    setOpenOnly(false);
     setFavoriteIds({});
 
     try {
@@ -695,6 +718,20 @@ export default function ResultsScreen() {
             {renderSortButton('الأقرب إلي', 'nearest', '📍')}
             {renderSortButton('أعلى تقييم', 'rating', '⭐')}
             {renderSortButton('أكثر مراجعات', 'reviews', '💬')}
+
+            <TouchableOpacity
+              style={[styles.sortButton, openOnly && styles.sortButtonActive]}
+              onPress={() => setOpenOnly((current) => !current)}
+            >
+              <Text
+                style={[
+                  styles.sortButtonText,
+                  openOnly && styles.sortButtonTextActive,
+                ]}
+              >
+                🟢 مفتوح الآن
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -713,6 +750,20 @@ export default function ResultsScreen() {
           </View>
         ) : null}
 
+        <TouchableOpacity style={styles.sponsoredResultSlot}>
+  <View style={styles.sponsoredBadge}>
+    <Text style={styles.sponsoredBadgeText}>مساحة إعلانية</Text>
+  </View>
+
+  <Text style={styles.sponsoredTitle}>
+    يظهر هنا محتوى ترويجي مميز
+  </Text>
+
+  <Text style={styles.sponsoredDescription}>
+    يتم عرض الإعلانات بشكل مستقل عن نتائج WenBest مع المحافظة على شفافية الترتيب.
+  </Text>
+</TouchableOpacity>
+
         {!loading && bestPlace ? (
   <View style={styles.featuredSection}>
     <Text style={styles.bestLabel}>{getFeaturedTitle()}</Text>
@@ -726,7 +777,25 @@ export default function ResultsScreen() {
     <Text style={styles.listCount}>{Math.max(sortedPlaces.length - 1, 0)} مكان</Text>
 
     <View style={styles.resultsList}>
-      {sortedPlaces.slice(1).map((place, index) => renderPlaceCard(place, index + 1))}
+      {sortedPlaces.slice(1).map((place, index) => (
+  <View key={`${place.id}-with-ad`}>
+    {index === 3 ? (
+      <TouchableOpacity style={styles.midSponsoredCard}>
+        <View style={styles.midSponsoredBadge}>
+          <Text style={styles.midSponsoredBadgeText}>مساحة إعلانية</Text>
+        </View>
+
+        <Text style={styles.midSponsoredTitle}>مساحة مخصصة للمحتوى الترويجي</Text>
+
+        <Text style={styles.midSponsoredDescription}>
+          يظهر هذا المحتوى بشكل مستقل عن ترتيب نتائج WenBest.
+        </Text>
+      </TouchableOpacity>
+    ) : null}
+
+    {renderPlaceCard(place, index + 1)}
+  </View>
+))}
     </View>
   </View>
 ) : null}
@@ -740,6 +809,23 @@ export default function ResultsScreen() {
             </Text>
           </View>
         ) : null}
+
+<TouchableOpacity style={styles.bottomSponsoredCard}>
+  <Text style={styles.bottomSponsoredTitle}>
+    ⭐ مساحة مخصصة للظهور المميز
+  </Text>
+
+  <Text style={styles.bottomSponsoredDescription}>
+    يمكن للأنشطة التجارية الظهور في مواقع مخصصة داخل التطبيق
+    بشكل مستقل عن ترتيب النتائج.
+  </Text>
+
+  <View style={styles.bottomSponsoredButton}>
+    <Text style={styles.bottomSponsoredButtonText}>
+      المزيد
+    </Text>
+  </View>
+</TouchableOpacity>
 
         <Text style={styles.footerNote}>
           خيار الأقرب إلي يستخدم موقعك الحالي فقط عند الضغط عليه، أما باقي الخيارات فتعتمد على المدينة المختارة.
@@ -1358,4 +1444,119 @@ bestSummaryHint: {
     fontSize: 16,
     fontWeight: '900',
   },
+  sponsoredResultSlot: {
+  backgroundColor: '#FFFFFF',
+  borderWidth: 1,
+  borderColor: '#FDE68A',
+  borderRadius: 24,
+  padding: 20,
+  marginBottom: 18,
+  overflow: 'hidden',
+},
+
+sponsoredBadge: {
+  alignSelf: 'flex-start',
+  backgroundColor: '#FFF7E0',
+  borderRadius: 999,
+  paddingHorizontal: 10,
+  paddingVertical: 5,
+},
+
+sponsoredBadgeText: {
+  color: '#A16207',
+  fontSize: 11,
+  fontWeight: '900',
+},
+
+sponsoredTitle: {
+  color: colors.navy,
+  fontSize: 22,
+  fontWeight: '900',
+  textAlign: 'right',
+  marginTop: 12,
+},
+
+sponsoredDescription: {
+  color: colors.muted,
+  fontSize: 14,
+  lineHeight: 24,
+  textAlign: 'right',
+  marginTop: 8,
+},
+midSponsoredCard: {
+  backgroundColor: '#FFFFFF',
+  borderWidth: 1,
+  borderColor: '#FDE68A',
+  borderRadius: 24,
+  padding: 20,
+  marginBottom: 18,
+},
+
+midSponsoredBadge: {
+  alignSelf: 'flex-start',
+  backgroundColor: '#FFF7E0',
+  borderRadius: 999,
+  paddingHorizontal: 10,
+  paddingVertical: 5,
+},
+
+midSponsoredBadgeText: {
+  color: '#A16207',
+  fontWeight: '900',
+  fontSize: 11,
+},
+
+midSponsoredTitle: {
+  color: colors.navy,
+  fontSize: 18,
+  fontWeight: '900',
+  textAlign: 'right',
+  marginTop: 10,
+},
+
+midSponsoredDescription: {
+  color: colors.muted,
+  fontSize: 13,
+  textAlign: 'right',
+  marginTop: 6,
+  lineHeight: 22,
+},
+bottomSponsoredCard: {
+  backgroundColor: '#FFFCF5',
+  borderWidth: 1,
+  borderColor: '#FDE68A',
+  borderRadius: 24,
+  padding: 22,
+  marginTop: 24,
+  marginBottom: 24,
+},
+
+bottomSponsoredTitle: {
+  color: colors.navy,
+  fontSize: 22,
+  fontWeight: '900',
+  textAlign: 'center',
+},
+
+bottomSponsoredDescription: {
+  color: colors.muted,
+  fontSize: 14,
+  lineHeight: 24,
+  textAlign: 'center',
+  marginTop: 10,
+},
+
+bottomSponsoredButton: {
+  alignSelf: 'center',
+  marginTop: 16,
+  backgroundColor: colors.gold,
+  paddingHorizontal: 24,
+  paddingVertical: 10,
+  borderRadius: 999,
+},
+
+bottomSponsoredButtonText: {
+  color: colors.navy,
+  fontWeight: '900',
+},
 });

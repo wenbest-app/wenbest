@@ -9,3 +9,8 @@ entrypoint = "./functions/search-google-places/index.ts"
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/search-google-places/*.html" ]
+[functions.place-details-google]
+enabled = true
+verify_jwt = false
+import_map = "./functions/place-details-google/deno.json"
+entrypoint = "./functions/place-details-google/index.ts"

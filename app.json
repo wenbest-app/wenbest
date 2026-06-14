@@ -1,22 +1,24 @@
 {
   "expo": {
     "name": "WenBest",
-    "slug": "WenBest",
+    "slug": "wenbest",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "wenbest",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/images/icon.png"
+      "bundleIdentifier": "com.wenbest.app",
+      "icon": "./assets/images/icon.png",
+      "supportsTablet": true
     },
     "android": {
+      "package": "com.wenbest.app",
       "adaptiveIcon": {
-        "backgroundColor": "#06214A",
-        "foregroundImage": "./assets/images/adaptive-icon.png"
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#06214A"
       },
-      "predictiveBackGestureEnabled": false,
-      "package": "com.wenbest.app"
+      "predictiveBackGestureEnabled": false
     },
     "web": {
       "output": "static",
@@ -27,11 +29,10 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#FFFFFF",
-          "android": {
-            "image": "./assets/images/splash-icon.png",
-            "imageWidth": 120
-          }
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 120,
+          "resizeMode": "contain",
+          "backgroundColor": "#FFFFFF"
         }
       ],
       "expo-web-browser"

@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import BottomNav from '../components/BottomNav';
 
 import { supabase } from '../../lib/supabase';
 
@@ -535,6 +536,7 @@ export default function FavoritesScreen() {
           المفضلة مرتبطة بحسابك، ويمكنك الرجوع لها من أي جهاز بعد تسجيل الدخول.
         </Text>
       </ScrollView>
+      <BottomNav />
     </SafeAreaView>
   );
 }

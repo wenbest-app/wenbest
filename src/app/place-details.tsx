@@ -21,6 +21,10 @@ const logoImage = require('../../assets/images/wenbest-logo.png');
 const GOOGLE_PLACE_DETAILS_FUNCTION_URL =
   process.env.EXPO_PUBLIC_SUPABASE_GOOGLE_PLACE_DETAILS_FUNCTION ?? '';
 
+const SUPABASE_ANON_KEY =
+  process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ??
+  'sb_publishable_F3HjH0J232oyIyNizRwtFw_Bk3b1tlO';
+
 const colors = {
   navy: '#06214A',
   teal: '#09AFA3',
@@ -133,6 +137,12 @@ export default function PlaceDetailsScreen() {
   const openStatusLabel = String(params.openStatusLabel ?? 'غير معلوم');
   const openStatusIcon = String(params.openStatusIcon ?? '⚪');
 
+  const cleanOpenStatusLabel = openStatusLabel
+  .replace('🟢', '')
+  .replace('🔴', '')
+  .replace('⚪', '')
+  .trim();
+
   const explainTitle =
     sortMode === 'nearest'
       ? '📍 لماذا ظهر كالأقرب لك؟'
@@ -166,6 +176,12 @@ export default function PlaceDetailsScreen() {
   const [reviewsError, setReviewsError] = useState('');
   const [googleReviews, setGoogleReviews] = useState<ReviewItem[]>(initialReviews);
   const [reviewsLoaded, setReviewsLoaded] = useState(initialReviews.length > 0);
+const [detailsLoading, setDetailsLoading] = useState(false);
+const [liveOpenStatusLabel, setLiveOpenStatusLabel] = useState(openStatusLabel);
+const [liveOpenStatusIcon, setLiveOpenStatusIcon] = useState(openStatusIcon);
+const [phoneNumber, setPhoneNumber] = useState('');
+const [website, setWebsite] = useState('');
+const [weeklyHours, setWeeklyHours] = useState<string[]>([]);
 
   const categoryLabel = getCategoryArabic(category);
   const mapsUrl = getMapsUrl(name, address, latitude, longitude);
@@ -343,57 +359,59 @@ ${mapsUrl}`;
       setMessage('تعذرت مشاركة المكان. حاول مرة أخرى.');
     }
   }
-
+  
   async function loadGoogleReviews() {
-    if (reviewsLoaded && googleReviews.length > 0) return;
+  setReviewsLoading(true);
+  setReviewsError('');
 
-    setReviewsLoading(true);
-    setReviewsError('');
-
-    try {
-      if (!GOOGLE_PLACE_DETAILS_FUNCTION_URL) {
-        throw new Error('رابط دالة جلب التعليقات غير موجود في ملف .env');
-      }
-
-      if (!id) {
-        throw new Error('لا يوجد Place ID لهذا المكان.');
-      }
-
-      const response = await fetch(GOOGLE_PLACE_DETAILS_FUNCTION_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          placeId: id,
-          language: 'ar',
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data?.error || 'فشل جلب التعليقات.');
-      }
-
-      if (data?.error && !data?.reviews) {
-        throw new Error(data.error);
-      }
-
-      const fetchedReviews = parseReviews(data.reviews);
-
-      setGoogleReviews(fetchedReviews);
-      setReviewsLoaded(true);
-
-      if (fetchedReviews.length === 0) {
-        setReviewsError(data?.error || 'لم تُرجع Google تعليقات لهذا المكان حاليًا.');
-      }
-    } catch (error: any) {
-      setReviewsError(error?.message || 'تعذر جلب التعليقات من Google حاليًا.');
-    } finally {
-      setReviewsLoading(false);
+  try {
+    if (!GOOGLE_PLACE_DETAILS_FUNCTION_URL) {
+      throw new Error('رابط دالة التعليقات غير موجود في ملف .env');
     }
+
+    if (!id) {
+      throw new Error('Place ID غير موجود لهذا المكان');
+    }
+
+    const response = await fetch(GOOGLE_PLACE_DETAILS_FUNCTION_URL, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    apikey: SUPABASE_ANON_KEY,
+Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+  },
+  body: JSON.stringify({
+    placeId: id,
+    language: 'ar',
+  }),
+});
+
+    const data = await response.json();
+
+    console.log('GOOGLE REVIEWS RESPONSE:', data);
+
+    if (!response.ok) {
+      throw new Error(data?.error || 'فشل الاتصال بدالة التعليقات');
+    }
+
+    if (data?.error) {
+      throw new Error(data.error);
+    }
+
+    const fetchedReviews = parseReviews(data.reviews);
+
+    setGoogleReviews(fetchedReviews);
+    setReviewsLoaded(true);
+
+    if (fetchedReviews.length === 0) {
+      setReviewsError('Google لم يرجع تعليقات لهذا المكان حاليًا.');
+    }
+  } catch (error: any) {
+    setReviewsError(error?.message || 'فشل جلب التعليقات.');
+  } finally {
+    setReviewsLoading(false);
   }
+}
 
   async function openReviewsModal() {
     setMessage('');
@@ -456,8 +474,13 @@ ${mapsUrl}`;
 
             <View style={[styles.whiteBadge, openStatusStyle]}>
               <Text style={styles.whiteBadgeText}>
-                {openStatusIcon} {openStatusLabel}
-              </Text>
+  {cleanOpenStatusLabel === 'مفتوح الآن'
+    ? '🟢'
+    : cleanOpenStatusLabel === 'مغلق الآن'
+      ? '🔴'
+      : '⚪'}{' '}
+  {cleanOpenStatusLabel}
+</Text>
             </View>
 
             <View style={styles.whiteBadge}>
@@ -501,6 +524,11 @@ ${mapsUrl}`;
         </View>
 
         <View style={styles.actionGrid}>
+          <TouchableOpacity style={styles.actionTileLight} onPress={openReviewsModal}>
+            <Text style={styles.actionTileIcon}>💬</Text>
+            <Text style={styles.actionTileTitleNavy}>التعليقات</Text>
+          </TouchableOpacity>
+          
           <TouchableOpacity style={styles.actionTileGold} onPress={openDirections}>
             <Text style={styles.actionTileIcon}>🚗</Text>
             <Text style={styles.actionTileTitle}>الاتجاهات</Text>
@@ -509,11 +537,6 @@ ${mapsUrl}`;
           <TouchableOpacity style={styles.actionTileTeal} onPress={openGoogleMaps}>
             <Text style={styles.actionTileIcon}>🗺️</Text>
             <Text style={styles.actionTileTitleTeal}>فتح الخرائط</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.actionTileLight} onPress={openReviewsModal}>
-            <Text style={styles.actionTileIcon}>💬</Text>
-            <Text style={styles.actionTileTitleNavy}>التعليقات</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -535,6 +558,66 @@ ${mapsUrl}`;
             </Text>
           </TouchableOpacity>
         </View>
+        
+        {phoneNumber || website || weeklyHours.length > 0 ? (
+  <View style={styles.infoCard}>
+    <Text style={styles.infoTitle}>معلومات إضافية</Text>
+
+    {phoneNumber ? (
+      <Text style={styles.infoRow}>
+        📞 {phoneNumber}
+      </Text>
+    ) : null}
+
+    {website ? (
+      <Text style={styles.infoRow}>
+        🌐 {website}
+      </Text>
+    ) : null}
+
+    {weeklyHours.length > 0 ? (
+      <>
+        <Text style={styles.infoSubtitle}>🕒 ساعات العمل</Text>
+
+        {weeklyHours.map((item, index) => (
+          <Text key={index} style={styles.infoRow}>
+            {item}
+          </Text>
+        ))}
+      </>
+    ) : null}
+  </View>
+) : null}
+
+{phoneNumber || website || weeklyHours.length > 0 ? (
+  <View style={styles.infoCard}>
+    <Text style={styles.infoTitle}>معلومات إضافية</Text>
+
+    {phoneNumber ? (
+      <Text style={styles.infoRow}>
+        📞 {phoneNumber}
+      </Text>
+    ) : null}
+
+    {website ? (
+      <Text style={styles.infoRow}>
+        🌐 {website}
+      </Text>
+    ) : null}
+
+    {weeklyHours.length > 0 ? (
+      <>
+        <Text style={styles.infoSubtitle}>🕒 ساعات العمل</Text>
+
+        {weeklyHours.map((item, index) => (
+          <Text key={index} style={styles.infoRow}>
+            {item}
+          </Text>
+        ))}
+      </>
+    ) : null}
+  </View>
+) : null}
 
         <TouchableOpacity style={styles.shareWideButton} onPress={sharePlace}>
           <Text style={styles.shareWideButtonText}>🔗 مشاركة المكان</Text>
@@ -821,10 +904,13 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   errorText: { color: colors.red },
-  statsGrid: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: 12, marginBottom: 16 },
+  statsGrid: { flexDirection: 'row-reverse',
+  justifyContent: 'space-between',
+  gap: 8,
+  marginBottom: 16, },
   statCard: {
-    width: '48%',
-    minHeight: 132,
+    width: '24%',
+  minHeight: 78,
     backgroundColor: colors.white,
     borderRadius: 22,
     borderWidth: 1,
@@ -833,10 +919,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  statIcon: { fontSize: 32, marginBottom: 8 },
+  statIcon: { fontSize: 20, marginBottom: 8 },
   statValue: {
     color: colors.navy,
-    fontSize: 23,
+    fontSize: 17,
     fontWeight: '900',
     textAlign: 'center',
   },
@@ -1133,4 +1219,36 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   openMapsReviewsButtonText: { color: colors.navy, fontWeight: '900', fontSize: 15 },
+  infoCard: {
+  backgroundColor: '#FFFFFF',
+  borderRadius: 20,
+  padding: 16,
+  marginBottom: 16,
+  borderWidth: 1,
+  borderColor: '#E2E8F0',
+},
+
+infoTitle: {
+  fontSize: 18,
+  fontWeight: '900',
+  color: colors.navy,
+  textAlign: 'right',
+  marginBottom: 12,
+},
+
+infoSubtitle: {
+  fontSize: 15,
+  fontWeight: '800',
+  color: colors.tealDark,
+  textAlign: 'right',
+  marginTop: 10,
+  marginBottom: 8,
+},
+infoRow: {
+  fontSize: 14,
+  color: colors.text,
+  textAlign: 'right',
+  lineHeight: 24,
+  marginBottom: 4,
+},
 });

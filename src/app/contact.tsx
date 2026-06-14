@@ -1,14 +1,15 @@
 import { router } from 'expo-router';
 import {
-    Image,
-    Linking,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Image,
+  Linking,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
+import BottomNav from '../components/BottomNav';
 
 const logoImage = require('../../assets/images/wenbest-logo.png');
 
@@ -92,6 +93,7 @@ export default function ContactScreen() {
           شكراً لمساعدتك في تحسين WenBest.
         </Text>
       </ScrollView>
+      <BottomNav />
     </SafeAreaView>
   );
 }

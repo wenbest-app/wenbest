@@ -18,25 +18,15 @@ type GoogleReview = {
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response('ok', {
-      headers: corsHeaders,
-    });
+    return new Response('ok', { headers: corsHeaders });
   }
 
   try {
     if (req.method !== 'POST') {
-      return new Response(
-        JSON.stringify({
-          error: 'Method not allowed',
-        }),
-        {
-          status: 405,
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+        status: 405,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     const googleApiKey =
@@ -52,81 +42,42 @@ serve(async (req) => {
         }),
         {
           status: 500,
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json',
-          },
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         }
       );
     }
 
     const body = await req.json().catch(() => ({}));
-
-    const placeId = String(
-      body.placeId || body.place_id || body.id || ''
-    ).trim();
-
+    const placeId = String(body.placeId || body.place_id || body.id || '').trim();
     const language = String(body.language || 'ar').trim();
 
     if (!placeId) {
-      return new Response(
-        JSON.stringify({
-          error: 'placeId is required',
-        }),
-        {
-          status: 400,
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      return new Response(JSON.stringify({ error: 'placeId is required' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
-    const url = new URL(
-      'https://maps.googleapis.com/maps/api/place/details/json'
-    );
+    const url = new URL('https://maps.googleapis.com/maps/api/place/details/json');
 
     url.searchParams.set('place_id', placeId);
-    url.searchParams.set(
-      'fields',
-      'name,rating,user_ratings_total,reviews,url'
-    );
+    url.searchParams.set('fields', 'name,rating,user_ratings_total,reviews,url');
     url.searchParams.set('language', language);
     url.searchParams.set('key', googleApiKey);
 
     const googleResponse = await fetch(url.toString());
-
     const googleData = await googleResponse.json();
-    console.log(
-  JSON.stringify(
-    {
-      status: googleData.status,
-      result: {
-        name: googleData.result?.name,
-        reviewsCount: googleData.result?.reviews?.length || 0,
-        userRatingsTotal: googleData.result?.user_ratings_total,
-      },
-    },
-    null,
-    2
-  )
-);
 
     if (!googleResponse.ok || googleData.status === 'REQUEST_DENIED') {
       return new Response(
         JSON.stringify({
-          error:
-            googleData.error_message ||
-            'Google Place Details request failed.',
+          error: googleData.error_message || 'Google Place Details request failed.',
           googleStatus: googleData.status,
+          reviews: [],
         }),
         {
           status: 500,
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json',
-          },
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         }
       );
     }
@@ -140,10 +91,7 @@ serve(async (req) => {
         }),
         {
           status: 200,
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json',
-          },
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         }
       );
     }
@@ -164,26 +112,18 @@ serve(async (req) => {
       }),
       {
         status: 200,
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json',
-        },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     );
   } catch (error) {
     return new Response(
       JSON.stringify({
-        error:
-          error instanceof Error
-            ? error.message
-            : 'Unexpected server error',
+        error: error instanceof Error ? error.message : 'Unexpected server error',
+        reviews: [],
       }),
       {
         status: 500,
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json',
-        },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     );
   }

@@ -34,22 +34,18 @@ function normalizeText(value: string) {
     .replace(/[إأآا]/g, 'ا')
     .replace(/[ى]/g, 'ي')
     .replace(/[ة]/g, 'ه')
+    .replace(/[ؤ]/g, 'و')
+    .replace(/[ئ]/g, 'ي')
+    .replace(/[ًٌٍَُِّْ]/g, '')
+    .replace(/[^\p{L}\p{N}\s]/gu, ' ')
     .replace(/\s+/g, ' ')
     .trim();
 }
 
 function toNumber(value: any): number | null {
-  if (value === null || value === undefined || value === '') {
-    return null;
-  }
-
+  if (value === null || value === undefined || value === '') return null;
   const numberValue = Number(value);
-
-  if (Number.isNaN(numberValue)) {
-    return null;
-  }
-
-  return numberValue;
+  return Number.isNaN(numberValue) ? null : numberValue;
 }
 
 function getDistanceInMeters(
@@ -59,7 +55,6 @@ function getDistanceInMeters(
   longitude2: number
 ) {
   const earthRadius = 6371000;
-
   const lat1 = (latitude1 * Math.PI) / 180;
   const lat2 = (latitude2 * Math.PI) / 180;
   const deltaLat = ((latitude2 - latitude1) * Math.PI) / 180;
@@ -72,9 +67,7 @@ function getDistanceInMeters(
       Math.sin(deltaLng / 2) *
       Math.sin(deltaLng / 2);
 
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-  return earthRadius * c;
+  return earthRadius * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
 function getCategoryArabic(category: string) {
@@ -94,279 +87,34 @@ function getCategoryArabic(category: string) {
   return names[category] ?? category;
 }
 
-function getGoogleSearchText(category: string, option: string, query?: string) {
-  const cleanQuery = query?.trim();
-
-  if (cleanQuery) {
-    return cleanQuery;
-  }
-
-  const optionKey = normalizeText(option);
-
-  const optionQueries: Record<string, string> = {
-    // Restaurants
-    'افضل اختيار': 'best restaurants',
-    سوداني: 'Sudanese restaurant',
-    عربي: 'Arabic restaurant',
-    هندي: 'Indian restaurant',
-    باكستاني: 'Pakistani restaurant',
-    صيني: 'Chinese restaurant',
-    تركي: 'Turkish restaurant',
-    ايراني: 'Iranian restaurant',
-    مصري: 'Egyptian restaurant',
-    شاورما: 'shawarma restaurant',
-    برجر: 'burger restaurant',
-    مندي: 'mandi restaurant',
-    بحري: 'seafood restaurant',
-    مشاوي: 'grill restaurant',
-    نباتي: 'vegetarian restaurant',
-
-    // International restaurant chains
-    kfc: 'KFC restaurant',
-    كنتاكي: 'KFC restaurant',
-
-    "mcdonald's": "McDonald's restaurant",
-    mcdonalds: "McDonald's restaurant",
-    mcdonald: "McDonald's restaurant",
-    ماكدونالدز: "McDonald's restaurant",
-    ماكدونالد: "McDonald's restaurant",
-    ماك: "McDonald's restaurant",
-
-    'burger king': 'Burger King restaurant',
-    'برجر كنج': 'Burger King restaurant',
-    'بيرجر كنج': 'Burger King restaurant',
-
-    'pizza hut': 'Pizza Hut restaurant',
-    'بيتزا هت': 'Pizza Hut restaurant',
-
-    "domino's pizza": "Domino's Pizza restaurant",
-    "domino's": "Domino's Pizza restaurant",
-    dominos: "Domino's Pizza restaurant",
-    دومينوز: "Domino's Pizza restaurant",
-    'دومينوز بيتزا': "Domino's Pizza restaurant",
-
-    "hardee's": "Hardee's restaurant",
-    hardees: "Hardee's restaurant",
-    هارديز: "Hardee's restaurant",
-
-    'texas chicken': 'Texas Chicken restaurant',
-    'تكساس تشيكن': 'Texas Chicken restaurant',
-
-    popeyes: 'Popeyes restaurant',
-    بوبايز: 'Popeyes restaurant',
-
-    subway: 'Subway restaurant',
-    'صب واي': 'Subway restaurant',
-    صبواي: 'Subway restaurant',
-
-    jollibee: 'Jollibee restaurant',
-    جوليبي: 'Jollibee restaurant',
-
-    starbucks: 'Starbucks cafe',
-    ستاربكس: 'Starbucks cafe',
-
-    'tim hortons': 'Tim Hortons cafe',
-    'تيم هورتنز': 'Tim Hortons cafe',
-    'تيم هورتونز': 'Tim Hortons cafe',
-
-    // Cafes
-    هادئ: 'quiet cafe',
-    'مناسب للعمل والدراس': 'cafe for work and study',
-    'جلسات خارجيه': 'outdoor seating cafe',
-    'مناسب للعائلات': 'family cafe',
-    'مناسب للتصوير': 'instagrammable cafe',
-
-    // Garages brands
-    toyota: 'Toyota garage',
-    lexus: 'Lexus garage',
-    nissan: 'Nissan garage',
-    infiniti: 'Infiniti garage',
-    honda: 'Honda garage',
-    mazda: 'Mazda garage',
-    mitsubishi: 'Mitsubishi garage',
-    subaru: 'Subaru garage',
-    suzuki: 'Suzuki garage',
-    gmc: 'GMC garage',
-    chevrolet: 'Chevrolet garage',
-    ford: 'Ford garage',
-    jeep: 'Jeep garage',
-    cadillac: 'Cadillac garage',
-    dodge: 'Dodge garage',
-    chrysler: 'Chrysler garage',
-    tesla: 'Tesla garage',
-    mercedes: 'Mercedes garage',
-    bmw: 'BMW garage',
-    audi: 'Audi garage',
-    porsche: 'Porsche garage',
-    volkswagen: 'Volkswagen garage',
-    mini: 'Mini Cooper garage',
-    hyundai: 'Hyundai garage',
-    kia: 'Kia garage',
-    genesis: 'Genesis garage',
-    'range rover': 'Range Rover garage',
-    'land rover': 'Land Rover garage',
-    jaguar: 'Jaguar garage',
-    bentley: 'Bentley garage',
-    'rolls royce': 'Rolls Royce garage',
-    volvo: 'Volvo garage',
-    peugeot: 'Peugeot garage',
-    renault: 'Renault garage',
-    fiat: 'Fiat garage',
-    'alfa romeo': 'Alfa Romeo garage',
-    'سيارات فاخرة ورياضيه': 'luxury sports car garage',
-'سيارات فاخرة ورياضية': 'luxury sports car garage',
-
-    // Garage services
-    'فحص كمبيوتر': 'car diagnostic garage',
-    'فحص شامل': 'car inspection garage',
-    'فحص قبل الشراء': 'pre purchase car inspection',
-    'صيانه دوريه': 'car service garage',
-    'تبديل زيوت': 'oil change car service',
-    'قير / جير': 'car transmission repair',
-    مكينه: 'car engine repair',
-    'كهرباء سيارات': 'auto electrical garage',
-    'مكيفات سيارات': 'car AC repair',
-    بطاريه: 'car battery service',
-    اطارات: 'tyre shop',
-    'سمكره وصبغ': 'car body shop paint',
-    تلميع: 'car detailing',
-
-    // Medical
-    مستشفى: 'hospital',
-    طوارئ: 'emergency hospital',
-    'عياده عامه': 'general clinic',
-    اسنان: 'dental clinic',
-    جلديه: 'dermatology clinic',
-    عيون: 'eye clinic',
-    اطفال: 'pediatric clinic',
-    'نساء وولاده': 'gynecology clinic',
-    عظام: 'orthopedic clinic',
-    'انف واذن وحنجره': 'ENT clinic',
-    مختبر: 'medical laboratory',
-    اشعه: 'radiology center',
-    'علاج طبيعي': 'physiotherapy clinic',
-
-    // Entertainment
-    'حدائق ومنتزهات': 'parks',
-    منتزهات: 'parks',
-    حدائق: 'gardens parks',
-    شواطئ: 'beach',
-    مولات: 'shopping mall',
-    سينما: 'cinema',
-    'العاب اطفال': 'kids play area',
-    'اماكن عائليه': 'family attractions',
-    'اماكن مجانيه': 'free attractions',
-    'اماكن داخليه': 'indoor activities',
-    'اماكن خارجيه': 'outdoor activities',
-    ممشى: 'walking promenade',
-    'اماكن سياحيه': 'tourist attraction',
-
-    // Salons and barbers
-    'حلاق رجالي': 'men barber shop',
-    حلاق: 'men barber shop',
-    'صالون نسائي': 'ladies salon',
-    صالون: 'beauty salon',
-    تجميل: 'beauty salon',
-    اظافر: 'nail salon',
-    مساج: 'massage spa',
-    'حمام مغربي': 'moroccan bath spa',
-    'عنايه بالبشره': 'facial skin care salon',
-
-    // Home services
-    سباك: 'plumber service',
-    كهربائي: 'electrician service',
-    مكيفات: 'AC repair service',
-    تكييف: 'AC repair service',
-    'تنظيف منازل': 'house cleaning service',
-    'مكافحه حشرات': 'pest control service',
-    حشرات: 'pest control service',
-    'نقل اثاث': 'furniture moving service',
-    'صيانه عامه': 'handyman service',
-
-    // Laundries
-    'مغسله ملابس': 'laundry',
-    مغسله: 'laundry',
-    'تنظيف جاف': 'dry cleaning',
-    كوي: 'ironing service',
-    'مغسله سجاد': 'carpet cleaning',
-    سجاد: 'carpet cleaning',
-    'مغسله سيارات': 'car wash',
-
-
-    // Travel and tourism
-    'حجوزات طيران': 'travel agency flight tickets',
-    'باقات سياحيه': 'tourism agency tour packages',
-    'باقات سياحية': 'tourism agency tour packages',
-    'سياحه داخل الامارات': 'UAE tour agency local tours',
-    'سياحة داخل الإمارات': 'UAE tour agency local tours',
-    'سياحه خارجيه': 'travel agency international tours',
-    'سياحة خارجية': 'travel agency international tours',
-    'تاشيرات سفر': 'visa services travel agency',
-    'تأشيرات سفر': 'visa services travel agency',
-    عمره: 'Umrah travel agency',
-    عمرة: 'Umrah travel agency',
-    'رحلات بحريه': 'cruise travel agency',
-    'رحلات بحرية': 'cruise travel agency',
-    'تاجير سيارات للسفر': 'travel car rental',
-    'تأجير سيارات للسفر': 'travel car rental',
-
-    // Hotels
-    فنادق: 'hotel',
-    فندق: 'hotel',
-    'شقق فندقيه': 'hotel apartments',
-    رخيص: 'budget hotel',
-    فاخر: 'luxury hotel',
-    'قريب من البحر': 'beach hotel',
-    'قريب من المطار': 'airport hotel',
+function getCityNames(city: string) {
+  const map: Record<string, string[]> = {
+    ajman: ['ajman', 'عجمان'],
+    sharjah: ['sharjah', 'الشارقه', 'الشارقة'],
+    dubai: ['dubai', 'دبي'],
+    abu_dhabi: ['abu dhabi', 'abudhabi', 'ابوظبي', 'ابو ظبي', 'أبوظبي', 'أبو ظبي'],
+    al_ain: ['al ain', 'alain', 'العين'],
+    ras_al_khaimah: ['ras al khaimah', 'rasalkhaimah', 'راس الخيمه', 'رأس الخيمة'],
+    fujairah: ['fujairah', 'الفجيره', 'الفجيرة'],
+    umm_al_quwain: ['umm al quwain', 'ummalquwain', 'ام القيوين', 'أم القيوين'],
   };
 
-  const directOptionQuery = optionQueries[optionKey];
+  return map[city] ?? [city];
+}
 
-  if (directOptionQuery) {
-    return directOptionQuery;
-  }
+function getRadiusByCity(city: string) {
+  const radiusMap: Record<string, number> = {
+    ajman: 9000,
+    sharjah: 14000,
+    dubai: 18000,
+    abu_dhabi: 22000,
+    al_ain: 18000,
+    ras_al_khaimah: 18000,
+    fujairah: 16000,
+    umm_al_quwain: 12000,
+  };
 
-  if (category === 'restaurants') {
-    return option === 'أفضل اختيار' ? 'best restaurants' : `${option} restaurant`;
-  }
-
-  if (category === 'cafes') {
-    return option === 'أفضل اختيار' ? 'best cafes' : `${option} cafe`;
-  }
-
-  if (category === 'garages') {
-    return option === 'أفضل اختيار' ? 'best car garage' : `${option} garage`;
-  }
-
-  if (category === 'clinics_hospitals') {
-    return option === 'أفضل اختيار' ? 'best clinic hospital' : `${option} clinic`;
-  }
-
-  if (category === 'entertainment_parks') {
-    return option === 'أفضل اختيار' ? 'best attractions parks' : `${option}`;
-  }
-
-  if (category === 'salons_barbers') {
-    return option === 'أفضل اختيار' ? 'best barber beauty salon' : `${option} salon`;
-  }
-
-  if (category === 'home_services') {
-    return option === 'أفضل اختيار' ? 'home maintenance service' : `${option} service`;
-  }
-
-  if (category === 'laundries') {
-    return option === 'أفضل اختيار' ? 'laundry' : `${option}`;
-  }
-
-  if (category === 'hotels_apartments') {
-    return option === 'أفضل اختيار' ? 'best hotels hotel apartments' : `${option}`;
-  }
-
-  if (category === 'travel_tourism') {
-    return option === 'أفضل اختيار' ? 'travel agency tourism agency' : `${option} travel agency`;
-  }
-
-  return option || getCategoryArabic(category);
+  return radiusMap[city] ?? 12000;
 }
 
 function getCategoryGoogleType(category: string) {
@@ -386,8 +134,224 @@ function getCategoryGoogleType(category: string) {
   return types[category] ?? '';
 }
 
-function getMatchLabel(item: any, category: string, option: string, query?: string) {
-  const rawText = normalizeText(
+function getOptionAliases(category: string, option: string, query?: string) {
+  const cleanQuery = query?.trim();
+
+  if (cleanQuery) {
+    return [
+      cleanQuery,
+      `${cleanQuery} near me`,
+      `${cleanQuery} ${getCategoryArabic(category)}`,
+    ];
+  }
+
+  const optionKey = normalizeText(option);
+
+  const aliases: Record<string, string[]> = {
+    'افضل اختيار': [
+      `best ${getCategoryArabic(category)}`,
+      getCategoryArabic(category),
+    ],
+
+    سوداني: [
+      'Sudanese restaurant',
+      'Sudanese food',
+      'Sudanese cuisine',
+      'مطعم سوداني',
+      'مأكولات سودانية',
+      'اكل سوداني',
+    ],
+    عربي: ['Arabic restaurant', 'Arab restaurant', 'مطعم عربي'],
+    هندي: ['Indian restaurant', 'مطعم هندي'],
+    باكستاني: ['Pakistani restaurant', 'مطعم باكستاني'],
+    صيني: ['Chinese restaurant', 'مطعم صيني'],
+    تركي: ['Turkish restaurant', 'مطعم تركي'],
+    ايراني: ['Iranian restaurant', 'Persian restaurant', 'مطعم ايراني'],
+    مصري: ['Egyptian restaurant', 'مطعم مصري'],
+    شاورما: ['shawarma restaurant', 'شاورما'],
+    برجر: ['burger restaurant', 'burger', 'برجر'],
+    مندي: ['mandi restaurant', 'mendi restaurant', 'مندي'],
+    بحري: ['seafood restaurant', 'مطعم سمك', 'seafood'],
+    مشاوي: ['grill restaurant', 'bbq restaurant', 'مشاوي'],
+    نباتي: ['vegetarian restaurant', 'vegan restaurant', 'نباتي'],
+
+    kfc: ['KFC restaurant', 'KFC'],
+    كنتاكي: ['KFC restaurant', 'KFC', 'كنتاكي'],
+    mcdonalds: ["McDonald's restaurant", "McDonald's", 'ماكدونالدز'],
+    ماكدونالدز: ["McDonald's restaurant", "McDonald's", 'ماكدونالدز'],
+    ماك: ["McDonald's restaurant", "McDonald's", 'ماك'],
+    'برجر كنج': ['Burger King restaurant', 'Burger King'],
+    'بيتزا هت': ['Pizza Hut restaurant', 'Pizza Hut'],
+    دومينوز: ["Domino's Pizza restaurant", "Domino's Pizza"],
+    هارديز: ["Hardee's restaurant", "Hardee's"],
+    ستاربكس: ['Starbucks cafe', 'Starbucks'],
+    'تيم هورتنز': ['Tim Hortons cafe', 'Tim Hortons'],
+
+    هادئ: ['quiet cafe', 'calm cafe', 'cafe'],
+    'مناسب للعمل والدراس': ['cafe for work and study', 'work cafe', 'study cafe'],
+    'جلسات خارجيه': ['outdoor seating cafe', 'outdoor cafe'],
+    'مناسب للعائلات': ['family cafe', 'family friendly cafe'],
+    'مناسب للتصوير': ['instagrammable cafe', 'beautiful cafe'],
+
+    سباك: ['plumber service', 'plumbing service', 'emergency plumber', 'سباك'],
+    كهربائي: ['electrician service', 'electrical maintenance', 'كهربائي'],
+    مكيفات: ['AC repair service', 'air conditioning repair', 'تكييف'],
+    تكييف: ['AC repair service', 'air conditioning repair', 'مكيفات'],
+    'تنظيف منازل': ['house cleaning service', 'home cleaning'],
+    'مكافحه حشرات': ['pest control service', 'مكافحة حشرات'],
+    حشرات: ['pest control service', 'مكافحة حشرات'],
+    'نقل اثاث': ['furniture moving service', 'movers'],
+    'صيانه عامه': ['handyman service', 'home maintenance'],
+
+    مستشفى: ['hospital', 'مستشفى'],
+    طوارئ: ['emergency hospital', 'emergency room', 'طوارئ'],
+    'عياده عامه': ['general clinic', 'medical clinic'],
+    اسنان: ['dental clinic', 'dentist', 'اسنان'],
+    جلديه: ['dermatology clinic', 'dermatologist'],
+    عيون: ['eye clinic', 'ophthalmology clinic'],
+    اطفال: ['pediatric clinic', 'children clinic'],
+    'نساء وولاده': ['gynecology clinic', 'obgyn clinic'],
+    عظام: ['orthopedic clinic', 'orthopedic doctor'],
+    مختبر: ['medical laboratory', 'lab test'],
+    اشعه: ['radiology center', 'x ray center'],
+    'علاج طبيعي': ['physiotherapy clinic', 'physical therapy'],
+
+    'حدائق ومنتزهات': ['parks', 'public park', 'garden'],
+    حدائق: ['parks', 'gardens'],
+    منتزهات: ['parks', 'public park'],
+    شواطئ: ['beach', 'public beach'],
+    مولات: ['shopping mall', 'mall'],
+    سينما: ['cinema', 'movie theater'],
+    'العاب اطفال': ['kids play area', 'children play area'],
+    'اماكن عائليه': ['family attractions', 'family places'],
+    'اماكن مجانيه': ['free attractions', 'free places'],
+    'اماكن داخليه': ['indoor activities', 'indoor places'],
+    'اماكن خارجيه': ['outdoor activities', 'outdoor places'],
+    ممشى: ['walking promenade', 'walking track'],
+    'اماكن سياحيه': ['tourist attraction', 'tourist places'],
+
+    'حلاق رجالي': ['men barber shop', 'barber shop'],
+    حلاق: ['men barber shop', 'barber shop'],
+    'صالون نسائي': ['ladies salon', 'beauty salon'],
+    صالون: ['beauty salon', 'salon'],
+    تجميل: ['beauty salon', 'beauty center'],
+    اظافر: ['nail salon', 'nails'],
+    مساج: ['massage spa', 'spa massage'],
+    'حمام مغربي': ['moroccan bath spa', 'moroccan bath'],
+    'عنايه بالبشره': ['facial skin care salon', 'skin care'],
+
+    'مغسله ملابس': ['laundry', 'laundromat', 'dry cleaning'],
+    مغسله: ['laundry', 'laundromat'],
+    'تنظيف جاف': ['dry cleaning', 'dry cleaner'],
+    كوي: ['ironing service', 'laundry ironing'],
+    'مغسله سجاد': ['carpet cleaning', 'rug cleaning'],
+    سجاد: ['carpet cleaning', 'rug cleaning'],
+    'مغسله سيارات': ['car wash', 'car cleaning'],
+
+    فنادق: ['hotel', 'hotels'],
+    فندق: ['hotel', 'hotels'],
+    'شقق فندقيه': ['hotel apartments', 'serviced apartments'],
+    رخيص: ['budget hotel', 'cheap hotel'],
+    فاخر: ['luxury hotel', 'five star hotel'],
+    'قريب من البحر': ['beach hotel', 'hotel near beach'],
+    'قريب من المطار': ['airport hotel', 'hotel near airport'],
+
+    'حجوزات طيران': ['travel agency flight tickets', 'flight booking agency'],
+    'باقات سياحيه': ['tourism agency tour packages', 'travel packages'],
+    'باقات سياحية': ['tourism agency tour packages', 'travel packages'],
+    'سياحه داخل الامارات': ['UAE tour agency local tours', 'local tourism agency'],
+    'سياحة داخل الإمارات': ['UAE tour agency local tours', 'local tourism agency'],
+    'سياحه خارجيه': ['travel agency international tours'],
+    'سياحة خارجية': ['travel agency international tours'],
+    'تاشيرات سفر': ['visa services travel agency', 'visa service'],
+    'تأشيرات سفر': ['visa services travel agency', 'visa service'],
+    عمره: ['Umrah travel agency', 'Umrah packages'],
+    عمرة: ['Umrah travel agency', 'Umrah packages'],
+  };
+
+  const brandAliases: Record<string, string[]> = {
+    toyota: ['Toyota garage', 'Toyota service center', 'Toyota specialist'],
+    lexus: ['Lexus garage', 'Lexus service center', 'Lexus specialist'],
+    nissan: ['Nissan garage', 'Nissan service center', 'Nissan specialist'],
+    infiniti: ['Infiniti garage', 'Infiniti service center', 'Infiniti specialist'],
+    honda: ['Honda garage', 'Honda service center', 'Honda specialist'],
+    mazda: ['Mazda garage', 'Mazda service center', 'Mazda specialist'],
+    mitsubishi: ['Mitsubishi garage', 'Mitsubishi service center'],
+    gmc: ['GMC garage', 'GMC service center', 'GMC specialist'],
+    chevrolet: ['Chevrolet garage', 'Chevrolet service center'],
+    ford: ['Ford garage', 'Ford service center', 'Ford specialist'],
+    jeep: ['Jeep garage', 'Jeep service center'],
+    cadillac: ['Cadillac garage', 'Cadillac service center'],
+    dodge: ['Dodge garage', 'Dodge service center'],
+    chrysler: ['Chrysler garage', 'Chrysler service center'],
+    tesla: ['Tesla garage', 'Tesla service center'],
+    mercedes: ['Mercedes garage', 'Mercedes service center', 'Mercedes specialist'],
+    bmw: ['BMW garage', 'BMW service center', 'BMW specialist', 'BMW workshop'],
+    audi: ['Audi garage', 'Audi service center', 'Audi specialist'],
+    porsche: ['Porsche garage', 'Porsche service center'],
+    volkswagen: ['Volkswagen garage', 'Volkswagen service center'],
+    hyundai: ['Hyundai garage', 'Hyundai service center'],
+    kia: ['Kia garage', 'Kia service center'],
+    genesis: ['Genesis garage', 'Genesis service center'],
+    'range rover': ['Range Rover garage', 'Range Rover service center'],
+    'land rover': ['Land Rover garage', 'Land Rover service center'],
+  };
+
+  const garageServices: Record<string, string[]> = {
+    'فحص كمبيوتر': ['car diagnostic garage', 'computer diagnostic car'],
+    'فحص شامل': ['car inspection garage', 'vehicle inspection'],
+    'فحص قبل الشراء': ['pre purchase car inspection', 'car inspection before buying'],
+    'صيانه دوريه': ['car service garage', 'vehicle maintenance'],
+    'تبديل زيوت': ['oil change car service', 'oil change'],
+    'قير / جير': ['car transmission repair', 'gearbox repair'],
+    مكينه: ['car engine repair', 'engine repair garage'],
+    'كهرباء سيارات': ['auto electrical garage', 'car electrician'],
+    'مكيفات سيارات': ['car AC repair', 'auto AC repair'],
+    بطاريه: ['car battery service', 'battery replacement'],
+    اطارات: ['tyre shop', 'tire shop'],
+    'سمكره وصبغ': ['car body shop paint', 'auto body repair'],
+    تلميع: ['car detailing', 'car polish'],
+  };
+
+  const allAliases = {
+    ...aliases,
+    ...brandAliases,
+    ...garageServices,
+  };
+
+  const direct = allAliases[optionKey];
+
+  if (direct) return direct;
+
+  if (category === 'restaurants') return [`${option} restaurant`, `${option} food`];
+  if (category === 'cafes') return [`${option} cafe`, 'cafe'];
+  if (category === 'garages') return [`${option} garage`, `${option} service center`, `${option} specialist`];
+  if (category === 'clinics_hospitals') return [`${option} clinic`, `${option} medical center`];
+  if (category === 'entertainment_parks') return [`${option}`, `${option} attraction`];
+  if (category === 'salons_barbers') return [`${option} salon`, `${option} spa`];
+  if (category === 'home_services') return [`${option} service`, `${option} maintenance`];
+  if (category === 'laundries') return [`${option}`, 'laundry'];
+  if (category === 'hotels_apartments') return [`${option}`, 'hotel'];
+  if (category === 'travel_tourism') return [`${option} travel agency`, `${option} tourism agency`];
+
+  return [option || getCategoryArabic(category)];
+}
+
+function buildSearchQueries(params: SearchPlacesParams) {
+  const cityNames = getCityNames(params.city);
+  const mainCity = cityNames[0];
+  const aliases = getOptionAliases(params.category, params.option, params.query);
+
+  const queries = aliases.flatMap((alias) => [
+    `${alias} in ${mainCity} UAE`,
+    `${mainCity} ${alias}`,
+  ]);
+
+  return Array.from(new Set(queries)).slice(0, 10);
+}
+
+function getItemText(item: any) {
+  return normalizeText(
     [
       item.name,
       item.address,
@@ -399,35 +363,51 @@ function getMatchLabel(item: any, category: string, option: string, query?: stri
       .filter(Boolean)
       .join(' ')
   );
+}
 
-  const searchText = normalizeText(query || option || '');
+function getSearchWords(category: string, option: string, query?: string) {
+  const clean = normalizeText(query || option || '');
 
-  if (!searchText || option === 'أفضل اختيار') {
-    return 'مطابقة عامة';
-  }
+  if (!clean || clean === normalizeText('أفضل اختيار')) return [];
 
-  const words = searchText
+  const ignored = new Set([
+    'مطعم',
+    'مطاعم',
+    'كافيه',
+    'كافيهات',
+    'فندق',
+    'فنادق',
+    'كراج',
+    'كراجات',
+    'سيارات',
+    'خدمه',
+    'خدمة',
+    'service',
+    'restaurant',
+    'restaurants',
+    'cafe',
+    'hotel',
+    'garage',
+    'near',
+    'best',
+  ]);
+
+  return clean
     .split(' ')
     .map((word) => word.trim())
-    .filter((word) => word.length >= 3);
+    .filter((word) => word.length >= 2 && !ignored.has(word));
+}
+
+function getMatchLabel(item: any, category: string, option: string, query?: string) {
+  const rawText = getItemText(item);
+  const words = getSearchWords(category, option, query);
+
+  if (!words.length || option === 'أفضل اختيار') return 'مطابقة عامة';
 
   const matchedWords = words.filter((word) => rawText.includes(word));
 
-  if (matchedWords.length >= 2) {
-    return 'مطابقة عالية';
-  }
-
-  if (matchedWords.length === 1) {
-    return 'مطابقة جيدة';
-  }
-
-  if (category === 'restaurants') {
-    return 'مطابقة عامة';
-  }
-
-  if (category === 'hotels_apartments' && rawText.includes('hotel')) {
-    return 'مطابقة عامة';
-  }
+  if (matchedWords.length >= 2) return 'مطابقة عالية';
+  if (matchedWords.length === 1) return 'مطابقة جيدة';
 
   return 'مطابقة ضعيفة';
 }
@@ -455,9 +435,7 @@ function normalizeGoogleItem(
 
   const name = item.name ?? item.displayName?.text ?? item.title;
 
-  if (!id || !name) {
-    return null;
-  }
+  if (!id || !name) return null;
 
   const address =
     item.address ??
@@ -497,38 +475,33 @@ function normalizeGoogleItem(
     toNumber(item.distanceMeters) ??
     toNumber(item.distance_meters) ??
     (latitude !== null && longitude !== null
-      ? getDistanceInMeters(
-          params.latitude,
-          params.longitude,
-          latitude,
-          longitude
-        )
+      ? getDistanceInMeters(params.latitude, params.longitude, latitude, longitude)
       : null);
 
   const provider: PlacesProvider =
     item.provider === 'geoapify' ? 'geoapify' : 'google';
 
-    const openNow =
-  item.opening_hours?.open_now ??
-  item.openingHours?.openNow ??
-  item.current_opening_hours?.open_now ??
-  item.currentOpeningHours?.openNow ??
-  item.open_now ??
-  item.openNow ??
-  item.is_open ??
-  item.isOpen ??
-  null;
+  const openNow =
+    item.opening_hours?.open_now ??
+    item.openingHours?.openNow ??
+    item.current_opening_hours?.open_now ??
+    item.currentOpeningHours?.openNow ??
+    item.open_now ??
+    item.openNow ??
+    item.is_open ??
+    item.isOpen ??
+    null;
 
-const openStatus =
-  openNow === true
-    ? 'مفتوح الآن'
-    : openNow === false
-      ? 'مغلق الآن'
-      : item.open_status ??
-        item.openStatus ??
-        item.raw?.open_status ??
-        item.raw?.openStatus ??
-        'حالة الدوام غير متوفرة';
+  const openStatus =
+    openNow === true
+      ? 'مفتوح الآن'
+      : openNow === false
+        ? 'مغلق الآن'
+        : item.open_status ??
+          item.openStatus ??
+          item.raw?.open_status ??
+          item.raw?.openStatus ??
+          'حالة الدوام غير متوفرة';
 
   const matchLabel =
     item.raw?.wenbest_match_label ??
@@ -551,39 +524,27 @@ const openStatus =
     distance,
     provider,
     raw: {
-  ...item,
-  open_status: openStatus,
-  opening_hours: {
-    ...(item.opening_hours ?? {}),
-    open_now: openNow,
-  },
-  wenbest_match_label: matchLabel,
-  wenbest_option_match_level: matchLevel,
-  wenbest_category: params.category,
-  wenbest_option: params.option,
-  wenbest_query: params.query ?? '',
-  distance,
-},
+      ...item,
+      open_status: openStatus,
+      opening_hours: {
+        ...(item.opening_hours ?? {}),
+        open_now: openNow,
+      },
+      wenbest_match_label: matchLabel,
+      wenbest_option_match_level: matchLevel,
+      wenbest_category: params.category,
+      wenbest_option: params.option,
+      wenbest_query: params.query ?? '',
+      distance,
+    },
   };
 }
 
 function extractResults(data: any) {
-  if (Array.isArray(data)) {
-    return data;
-  }
-
-  if (Array.isArray(data?.results)) {
-    return data.results;
-  }
-
-  if (Array.isArray(data?.places)) {
-    return data.places;
-  }
-
-  if (Array.isArray(data?.data)) {
-    return data.data;
-  }
-
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.results)) return data.results;
+  if (Array.isArray(data?.places)) return data.places;
+  if (Array.isArray(data?.data)) return data.data;
   return [];
 }
 
@@ -592,7 +553,9 @@ function removeDuplicates(items: PlaceResult[]) {
   const unique: PlaceResult[] = [];
 
   for (const item of items) {
-    const key = item.id || `${item.name}-${item.address}`;
+    const normalizedName = normalizeText(item.name);
+    const normalizedAddress = normalizeText(item.address);
+    const key = item.id || `${normalizedName}-${normalizedAddress}`;
 
     if (!seen.has(key)) {
       seen.add(key);
@@ -603,47 +566,67 @@ function removeDuplicates(items: PlaceResult[]) {
   return unique;
 }
 
-function isProbablyRelevant(place: PlaceResult, params: SearchPlacesParams) {
-  if (params.option === 'أفضل اختيار') {
+function isInSelectedCity(place: PlaceResult, params: SearchPlacesParams) {
+  const text = normalizeText(`${place.name} ${place.address}`);
+  const cityNames = getCityNames(params.city).map(normalizeText);
+
+  if (cityNames.some((cityName) => text.includes(cityName))) {
     return true;
   }
 
-  const level = Number(place.raw?.wenbest_option_match_level ?? 0);
-
-  if (level >= 1) {
-    return true;
-  }
-
-  const text = normalizeText(
-    `${place.name} ${place.address} ${JSON.stringify(place.raw?.types ?? [])}`
-  );
-
-  const option = normalizeText(params.option);
-  const query = normalizeText(params.query ?? '');
-
-  if (option && text.includes(option)) {
-    return true;
-  }
-
-  if (query) {
-    const words = query.split(' ').filter((word) => word.length >= 3);
-
-    if (words.some((word) => text.includes(word))) {
-      return true;
-    }
+  if (place.distance !== null && place.distance !== undefined) {
+    return place.distance <= getRadiusByCity(params.city);
   }
 
   return false;
 }
 
-function sortInitialResults(items: PlaceResult[]) {
-  return [...items].sort((a, b) => {
-    const bScore = calculateWenBestScore(b);
-    const aScore = calculateWenBestScore(a);
+function isProbablyRelevant(place: PlaceResult, params: SearchPlacesParams) {
+  if (params.option === 'أفضل اختيار' && !params.query) return true;
 
-    if (bScore !== aScore) {
-      return bScore - aScore;
-    }
+  const level = Number(place.raw?.wenbest_option_match_level ?? 0);
+
+  if (level >= 1) return true;
+
+  const text = normalizeText(
+    `${place.name} ${place.address} ${JSON.stringify(place.raw?.types ?? [])}`
+  );
+
+  const words = getSearchWords(params.category, params.option, params.query);
+
+  if (!words.length) return true;
+
+  return words.some((word) => text.includes(word));
+}
+
+function getStrictRelevanceScore(place: PlaceResult, params: SearchPlacesParams) {
+  const text = normalizeText(
+    `${place.name} ${place.address} ${JSON.stringify(place.raw?.types ?? [])}`
+  );
+
+  const words = getSearchWords(params.category, params.option, params.query);
+  const matchedWords = words.filter((word) => text.includes(word)).length;
+
+  const matchLevel = Number(place.raw?.wenbest_option_match_level ?? 0);
+  const cityBonus = isInSelectedCity(place, params) ? 8 : 0;
+  const distanceBonus =
+    place.distance !== null && place.distance !== undefined
+      ? Math.max(0, 8 - place.distance / 3000)
+      : 0;
+
+  return matchedWords * 12 + matchLevel * 10 + cityBonus + distanceBonus;
+}
+
+function sortInitialResults(items: PlaceResult[], params: SearchPlacesParams) {
+  return [...items].sort((a, b) => {
+    const relevanceDiff =
+      getStrictRelevanceScore(b, params) - getStrictRelevanceScore(a, params);
+
+    if (relevanceDiff !== 0) return relevanceDiff;
+
+    const scoreDiff = calculateWenBestScore(b) - calculateWenBestScore(a);
+
+    if (scoreDiff !== 0) return scoreDiff;
 
     const aDistance = a.distance ?? Number.MAX_SAFE_INTEGER;
     const bDistance = b.distance ?? Number.MAX_SAFE_INTEGER;
@@ -657,48 +640,26 @@ export function calculateWenBestScore(place: PlaceResult) {
   const reviewCount = place.reviewCount ?? 0;
   const distance = place.distance ?? 999999;
 
-  const ratingScore = Math.min(rating / 5, 1) * 55;
-  const reviewScore = Math.min(Math.log10(reviewCount + 1) / 4, 1) * 25;
+  const ratingScore = Math.min(rating / 5, 1) * 50;
+  const reviewScore = Math.min(Math.log10(reviewCount + 1) / 4, 1) * 22;
 
   let distanceScore = 0;
 
-  if (distance <= 1000) {
-    distanceScore = 20;
-  } else if (distance <= 3000) {
-    distanceScore = 16;
-  } else if (distance <= 7000) {
-    distanceScore = 12;
-  } else if (distance <= 15000) {
-    distanceScore = 8;
-  } else if (distance <= 30000) {
-    distanceScore = 4;
-  }
+  if (distance <= 1000) distanceScore = 20;
+  else if (distance <= 3000) distanceScore = 17;
+  else if (distance <= 7000) distanceScore = 13;
+  else if (distance <= 15000) distanceScore = 8;
+  else if (distance <= 30000) distanceScore = 3;
 
   const matchLevel = Number(place.raw?.wenbest_option_match_level ?? 1);
-  const matchBonus = Math.min(matchLevel, 3) * 3;
+  const matchBonus = Math.min(matchLevel, 3) * 5;
 
   const score = Math.round(ratingScore + reviewScore + distanceScore + matchBonus);
 
   return Math.max(0, Math.min(score, 100));
 }
 
-export async function searchPlaces(params: SearchPlacesParams): Promise<PlaceResult[]> {
-  if (PLACES_PROVIDER !== 'google') {
-    throw new Error('مزود البحث الحالي غير مدعوم. استخدم Google Places.');
-  }
-
-  if (!GOOGLE_FUNCTION_URL) {
-    throw new Error(
-      'رابط Supabase Google Places Function غير موجود في ملف .env'
-    );
-  }
-
-  const searchText = getGoogleSearchText(
-    params.category,
-    params.option,
-    params.query
-  );
-
+async function fetchGoogleResults(params: SearchPlacesParams, searchText: string) {
   const googleType = getCategoryGoogleType(params.category);
 
   const response = await fetch(GOOGLE_FUNCTION_URL, {
@@ -715,7 +676,7 @@ export async function searchPlaces(params: SearchPlacesParams): Promise<PlaceRes
       longitude: params.longitude,
       city: params.city,
       type: googleType,
-      radius: 30000,
+      radius: getRadiusByCity(params.city),
       language: 'ar',
     }),
   });
@@ -728,25 +689,61 @@ export async function searchPlaces(params: SearchPlacesParams): Promise<PlaceRes
   }
 
   const data = await response.json();
-  const rawResults = extractResults(data);
+  return extractResults(data);
+}
 
-  const normalized = rawResults
+export async function searchPlaces(params: SearchPlacesParams): Promise<PlaceResult[]> {
+  if (PLACES_PROVIDER !== 'google') {
+    throw new Error('مزود البحث الحالي غير مدعوم. استخدم Google Places.');
+  }
+
+  if (!GOOGLE_FUNCTION_URL) {
+    throw new Error('رابط Supabase Google Places Function غير موجود في ملف .env');
+  }
+
+  const queries = buildSearchQueries(params);
+  const allRawResults: any[] = [];
+
+  for (const query of queries) {
+    try {
+      const results = await fetchGoogleResults(params, query);
+      allRawResults.push(...results);
+
+      if (allRawResults.length >= 60) {
+        break;
+      }
+    } catch {
+      // تجاهل فشل بحث واحد واستمر في بقية المرادفات
+    }
+  }
+
+  const normalized = allRawResults
     .map((item: any) =>
       normalizeGoogleItem(item, {
         ...params,
-        query: searchText,
+        query: params.query || params.option,
       })
     )
     .filter(Boolean) as PlaceResult[];
 
   const unique = removeDuplicates(normalized);
 
+  const cityFiltered = unique.filter((place) => isInSelectedCity(place, params));
+
+// لا ترجع لمدن أخرى إلا إذا لم توجد أي نتيجة داخل المدينة
+const cityPool = cityFiltered.length > 0 ? cityFiltered : unique;
+
   const relevant =
-    params.option === 'أفضل اختيار'
-      ? unique
-      : unique.filter((place) => isProbablyRelevant(place, params));
+    params.option === 'أفضل اختيار' && !params.query
+      ? cityPool
+      : cityPool.filter((place) => isProbablyRelevant(place, params));
 
-  const finalResults = relevant.length >= 3 ? relevant : unique;
+  const finalResults =
+    relevant.length >= 4
+      ? relevant
+      : cityPool.length >= 4
+        ? cityPool
+        : unique;
 
-  return sortInitialResults(finalResults);
+  return sortInitialResults(finalResults, params).slice(0, 30);
 }
