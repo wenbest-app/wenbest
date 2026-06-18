@@ -2,9 +2,15 @@ import { ScrollViewStyleReset } from 'expo-router/html';
 
 export default function Root({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ar">
+    <html lang="ar" dir="rtl">
       <head>
         <ScrollViewStyleReset />
+
+        <meta charSet="utf-8" />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+        />
 
         <script
           async
@@ -22,7 +28,6 @@ export default function Root({ children }: { children: React.ReactNode }) {
           }}
         />
       </head>
-
       <body>{children}</body>
     </html>
   );
