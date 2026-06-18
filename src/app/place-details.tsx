@@ -626,30 +626,6 @@ Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
         <View style={styles.reasonCard}>
           <Text style={styles.reasonTitle}>{explainTitle}</Text>
           <Text style={styles.reasonText}>{explainText}</Text>
-
-          <View style={styles.reasonCompactRow}>
-            <Text style={styles.reasonCompactIcon}>🧠</Text>
-            <View style={styles.reasonCompactTextBox}>
-              <Text style={styles.reasonItemTitle}>درجة WenBest</Text>
-              <Text style={styles.reasonItemText}>{score}/100</Text>
-            </View>
-          </View>
-
-          <View style={styles.reasonCompactRow}>
-            <Text style={styles.reasonCompactIcon}>🔎</Text>
-            <View style={styles.reasonCompactTextBox}>
-              <Text style={styles.reasonItemTitle}>مطابقة البحث</Text>
-              <Text style={styles.reasonItemText}>{matchLabel}</Text>
-            </View>
-          </View>
-
-          <View style={styles.reasonCompactRow}>
-            <Text style={styles.reasonCompactIcon}>📍</Text>
-            <View style={styles.reasonCompactTextBox}>
-              <Text style={styles.reasonItemTitle}>المسافة</Text>
-              <Text style={styles.reasonItemText}>{formatDistance(distance)}</Text>
-            </View>
-          </View>
         </View>
       </ScrollView>
 
